@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import Icon from "@/components/ui/icon"
 import type { ContentType } from "./api"
 
 export type FormItem = Record<string, string | number>
@@ -23,7 +24,27 @@ const FIELDS: Record<ContentType, Field[]> = {
     { key: "category", label: "Суть дела", placeholder: "Сделка с банкротом · Арбитражный суд" },
     { key: "year", label: "Год", placeholder: "2026" },
   ],
+  services: [
+    { key: "title", label: "Название услуги", placeholder: "Проверка объекта и сделки" },
+    { key: "description", label: "Описание", multiline: 3, placeholder: "Что входит в услугу" },
+    { key: "price", label: "Цена", placeholder: "от 15 000 ₽" },
+  ],
 }
+
+export const SERVICE_ICONS: { name: string; label: string }[] = [
+  { name: "FileSearch", label: "Проверка" },
+  { name: "Building2", label: "Здание" },
+  { name: "Home", label: "Дом" },
+  { name: "Trees", label: "Земля" },
+  { name: "Scale", label: "Суд" },
+  { name: "FileText", label: "Документ" },
+  { name: "Handshake", label: "Сделка" },
+  { name: "KeyRound", label: "Ключи" },
+  { name: "Landmark", label: "Госорган" },
+  { name: "ShieldCheck", label: "Защита" },
+  { name: "Users", label: "Семья" },
+  { name: "Wallet", label: "Деньги" },
+]
 
 export const emptyItem = (type: ContentType): FormItem => {
   const item: FormItem = { sort_order: 0 }
@@ -33,6 +54,7 @@ export const emptyItem = (type: ContentType): FormItem => {
     item.read_time = "5 мин"
   }
   if (type === "cases") item.year = String(new Date().getFullYear())
+  if (type === "services") item.icon = "Scale"
   return item
 }
 
@@ -80,6 +102,28 @@ export function ItemForm({
           {f.hint && <p className="text-xs text-muted-foreground">{f.hint}</p>}
         </div>
       ))}
+      {type === "services" && (
+        <div className="space-y-1.5">
+          <Label>Иконка</Label>
+          <div className="flex flex-wrap gap-2">
+            {SERVICE_ICONS.map((ic) => (
+              <button
+                key={ic.name}
+                type="button"
+                title={ic.label}
+                onClick={() => setItem({ ...item, icon: ic.name })}
+                className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${
+                  item.icon === ic.name
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-foreground/15 text-foreground/70 hover:border-foreground/40"
+                }`}
+              >
+                <Icon name={ic.name} size={18} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="sort_order">Приоритет показа</Label>
         <Input

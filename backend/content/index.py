@@ -13,7 +13,10 @@ CORS = {
 FIELDS = {
     'articles': ['title', 'category', 'date_label', 'read_time', 'excerpt', 'body', 'sort_order'],
     'cases': ['title', 'category', 'year', 'sort_order'],
+    'services': ['title', 'description', 'price', 'icon', 'sort_order'],
 }
+
+SETTINGS_KEYS = ['phone', 'email', 'address', 'hours', 'telegram', 'whatsapp', 'vk']
 
 
 def resp(status: int, data) -> dict:
@@ -34,8 +37,15 @@ def fetch(cur, schema: str, table: str) -> list:
     return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 
+def fetch_all(cur, schema: str) -> dict:
+    data = {t: fetch(cur, schema, t) for t in FIELDS}
+    cur.execute(f"SELECT key, value FROM {schema}.site_settings")
+    data['settings'] = {k: v for k, v in cur.fetchall()}
+    return data
+
+
 def handler(event: dict, context) -> dict:
-    """Статьи и выигранные дела бюро: публичное чтение и управление из админ-панели по паролю."""
+    """Контент сайта (статьи, дела, услуги, контакты): публичное чтение и управление из админ-панели по паролю."""
     method = event.get('httpMethod', 'GET')
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
@@ -47,7 +57,7 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     if method == 'GET':
-        data = {'articles': fetch(cur, schema, 'articles'), 'cases': fetch(cur, schema, 'cases')}
+        data = fetch_all(cur, schema)
         conn.close()
         return resp(200, data)
 
@@ -60,6 +70,17 @@ def handler(event: dict, context) -> dict:
 
     body = json.loads(event.get('body') or '{}')
     table = body.get('type') or params.get('type')
+    if table == 'settings' and method == 'PUT':
+        values = body.get('settings') or {}
+        for k in SETTINGS_KEYS:
+            if k in values:
+                cur.execute(
+                    f"INSERT INTO {schema}.site_settings (key, value) VALUES ({q(k)}, {q(values[k])}) "
+                    f"ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+                )
+        data = fetch_all(cur, schema)
+        conn.close()
+        return resp(200, data)
     if table not in FIELDS:
         conn.close()
         return resp(400, {'error': 'Неизвестный тип'})
@@ -87,6 +108,6 @@ def handler(event: dict, context) -> dict:
         ]
         cur.execute(f"UPDATE {schema}.{table} SET {', '.join(sets)} WHERE id = {int(item_id)}")
 
-    data = {'articles': fetch(cur, schema, 'articles'), 'cases': fetch(cur, schema, 'cases')}
+    data = fetch_all(cur, schema)
     conn.close()
     return resp(200, data)

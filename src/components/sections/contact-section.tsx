@@ -4,6 +4,7 @@ import { MagneticButton } from "@/components/magnetic-button"
 import Icon from "@/components/ui/icon"
 import { SectionTabs } from "@/components/section-tabs"
 import { AboutContent } from "@/components/sections/about-section"
+import { useContent } from "@/data/articles"
 
 const TABS = ["Контакты", "О нас"] as const
 
@@ -18,6 +19,15 @@ export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [tab, setTab] = useState<(typeof TABS)[number]>("Контакты")
+  const { data } = useContent()
+  const st = data?.settings ?? {}
+  const phone = st.phone || ""
+  const email = st.email || ""
+  const socials = [
+    { name: "Telegram", url: st.telegram },
+    { name: "WhatsApp", url: st.whatsapp },
+    { name: "VK", url: st.vk },
+  ].filter((x) => x.url)
 
   const validate = () => {
     const e: Errors = {}
@@ -73,7 +83,7 @@ export function ContactSection() {
 
             <div className="space-y-4 md:space-y-7">
               <a
-                href="tel:+74950000000"
+                href={`tel:${phone.replace(/[^\d+]/g, "")}`}
                 className={`group block transition-all duration-700 ${
                   isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
                 }`}
@@ -84,12 +94,12 @@ export function ContactSection() {
                   <span className="font-mono text-xs text-foreground/60">Телефон</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-primary md:text-2xl">
-                  +7 (495) 000-00-00
+                  {phone}
                 </p>
               </a>
 
               <a
-                href="mailto:help@legaldome.ru"
+                href={`mailto:${email}`}
                 className={`group block transition-all duration-700 ${
                   isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
                 }`}
@@ -100,7 +110,7 @@ export function ContactSection() {
                   <span className="font-mono text-xs text-foreground/60">Email</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-primary md:text-2xl">
-                  help@legaldome.ru
+                  {email}
                 </p>
               </a>
 
@@ -114,8 +124,8 @@ export function ContactSection() {
                   <Icon name="MapPin" size={12} className="text-primary" />
                   <span className="font-mono text-xs text-foreground/60">Офис</span>
                 </div>
-                <p className="text-base text-foreground md:text-2xl">Москва, Пречистенская наб., 17</p>
-                <p className="font-mono text-xs text-foreground/50">Пн–Пт 9:00–20:00, Сб по записи</p>
+                <p className="text-base text-foreground md:text-2xl">{st.address}</p>
+                <p className="font-mono text-xs text-foreground/50">{st.hours}</p>
               </div>
 
               <div
@@ -124,13 +134,15 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "500ms" }}
               >
-                {["Telegram", "WhatsApp", "VK"].map((social) => (
+                {socials.map((social) => (
                   <a
-                    key={social}
-                    href="#"
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noreferrer"
                     className="border-b border-transparent font-mono text-xs text-foreground/60 transition-all hover:border-primary hover:text-foreground"
                   >
-                    {social}
+                    {social.name}
                   </a>
                 ))}
               </div>

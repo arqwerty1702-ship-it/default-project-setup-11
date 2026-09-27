@@ -17,21 +17,25 @@ import Icon from "@/components/ui/icon"
 import { SectionTabs } from "@/components/section-tabs"
 import { AdminLogin } from "@/components/admin/AdminLogin"
 import { ItemForm, emptyItem, type FormItem } from "@/components/admin/ItemForm"
+import { SettingsForm } from "@/components/admin/SettingsForm"
 import { adminRequest, clearPassword, getPassword, type ContentType } from "@/components/admin/api"
 import { useContent } from "@/data/articles"
 
-const TABS = ["Статьи", "Практика"] as const
-const TYPE: Record<(typeof TABS)[number], ContentType> = { Статьи: "articles", Практика: "cases" }
+const TABS = ["Статьи", "Практика", "Услуги", "Контакты"] as const
+type Tab = (typeof TABS)[number]
+const TYPE: Record<Exclude<Tab, "Контакты">, ContentType> = { Статьи: "articles", Практика: "cases", Услуги: "services" }
+const NEW_LABEL: Record<ContentType, string> = { articles: "Новая статья", cases: "Новое дело", services: "Новая услуга" }
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getPassword())
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Статьи")
+  const [tab, setTab] = useState<Tab>("Статьи")
   const [editing, setEditing] = useState<FormItem | null>(null)
   const [removing, setRemoving] = useState<{ id: number; title: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const { data, isLoading } = useContent()
   const qc = useQueryClient()
-  const type = TYPE[tab]
+  const isSettings = tab === "Контакты"
+  const type: ContentType = isSettings ? "articles" : TYPE[tab]
 
   if (!authed) return <Wrapper><AdminLogin onSuccess={() => setAuthed(true)} /></Wrapper>
 
@@ -39,7 +43,12 @@ export default function Admin() {
     setSaving(true)
     try {
       const res = await adminRequest(method, { type, ...body })
-      qc.setQueryData(["content"], { articles: res.articles, cases: res.cases })
+      qc.setQueryData(["content"], {
+        articles: res.articles,
+        cases: res.cases,
+        services: res.services,
+        settings: res.settings,
+      })
       toast.success(msg)
       return true
     } catch (e) {
@@ -62,7 +71,12 @@ export default function Admin() {
     if (ok) setEditing(null)
   }
 
-  const items = type === "articles" ? data?.articles ?? [] : data?.cases ?? []
+  const items: { id: number; title: string; sub: string; raw: FormItem }[] =
+    type === "articles"
+      ? (data?.articles ?? []).map((a) => ({ id: a.id, title: a.title, sub: `${a.category} · ${a.date_label}`, raw: a as unknown as FormItem }))
+      : type === "cases"
+        ? (data?.cases ?? []).map((c) => ({ id: c.id, title: c.title, sub: `${c.category} · ${c.year}`, raw: c as unknown as FormItem }))
+        : (data?.services ?? []).map((v) => ({ id: v.id, title: v.title, sub: v.price, raw: v as unknown as FormItem }))
 
   return (
     <Wrapper>
@@ -100,13 +114,25 @@ export default function Admin() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <SectionTabs tabs={TABS} value={tab} onChange={setTab} />
-          <Button onClick={() => setEditing(emptyItem(type))}>
-            <Icon name="Plus" size={18} className="mr-1.5" />
-            {type === "articles" ? "Новая статья" : "Новое дело"}
-          </Button>
+          {!isSettings && (
+            <Button onClick={() => setEditing(emptyItem(type))}>
+              <Icon name="Plus" size={18} className="mr-1.5" />
+              {NEW_LABEL[type]}
+            </Button>
+          )}
         </div>
 
-        {isLoading ? (
+        {isSettings ? (
+          isLoading ? (
+            <p className="text-muted-foreground">Загрузка...</p>
+          ) : (
+            <SettingsForm
+              initial={data?.settings ?? {}}
+              saving={saving}
+              onSave={(settings) => run("PUT", { type: "settings", settings }, "Контакты сохранены")}
+            />
+          )
+        ) : isLoading ? (
           <p className="text-muted-foreground">Загрузка...</p>
         ) : items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-foreground/15 p-10 text-center text-muted-foreground">
@@ -121,12 +147,10 @@ export default function Admin() {
               >
                 <div className="min-w-0">
                   <div className="truncate font-medium text-foreground">{it.title}</div>
-                  <div className="truncate text-sm text-muted-foreground">
-                    {"date_label" in it ? `${it.category} · ${it.date_label}` : `${it.category} · ${it.year}`}
-                  </div>
+                  <div className="truncate text-sm text-muted-foreground">{it.sub}</div>
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => setEditing({ ...it })} aria-label="Редактировать">
+                  <Button variant="ghost" size="icon" onClick={() => setEditing({ ...it.raw })} aria-label="Редактировать">
                     <Icon name="Pencil" size={18} />
                   </Button>
                   <Button
@@ -148,7 +172,7 @@ export default function Admin() {
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editing?.id ? "Редактирование" : type === "articles" ? "Новая статья" : "Новое дело"}
+              {editing?.id ? "Редактирование" : NEW_LABEL[type]}
             </DialogTitle>
           </DialogHeader>
           {editing && (

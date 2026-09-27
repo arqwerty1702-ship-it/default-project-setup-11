@@ -1,39 +1,21 @@
 import { useReveal } from "@/hooks/use-reveal"
 import Icon from "@/components/ui/icon"
+import { useContent } from "@/data/articles"
 
-const services = [
-  {
-    icon: "FileSearch",
-    title: "Проверка объекта и сделки",
-    description: "Юридическая экспертиза квартиры, дома или участка, проверка продавца, подготовка договора и безопасных расчётов.",
-    price: "от 15 000 ₽",
-    direction: "top",
-  },
-  {
-    icon: "Building2",
-    title: "Споры с застройщиками",
-    description: "Неустойка за просрочку, недостатки отделки, расторжение ДДУ и возврат средств дольщикам.",
-    price: "от 25 000 ₽",
-    direction: "right",
-  },
-  {
-    icon: "Trees",
-    title: "Земельное право",
-    description: "Межевые споры, изменение вида разрешённого использования, оформление и узаконивание построек.",
-    price: "от 20 000 ₽",
-    direction: "left",
-  },
-  {
-    icon: "Scale",
-    title: "Судебная защита",
-    description: "Раздел имущества, наследство, выселение, оспаривание сделок — представительство во всех инстанциях.",
-    price: "от 40 000 ₽",
-    direction: "bottom",
-  },
-]
+const DIRECTIONS = ["top", "right", "left", "bottom"]
+
+type Service = { icon: string; title: string; description: string; price: string; direction: string }
 
 export function ServicesSection() {
   const { ref, isVisible } = useReveal(0.3)
+  const { data, isLoading } = useContent()
+  const services: Service[] = (data?.services ?? []).map((s, i) => ({
+    icon: s.icon || "Scale",
+    title: s.title,
+    description: s.description,
+    price: s.price,
+    direction: DIRECTIONS[i % 4],
+  }))
 
   return (
     <section
@@ -52,7 +34,8 @@ export function ServicesSection() {
           <p className="font-mono text-sm text-foreground/60 md:text-base">/ Всё, что связано с недвижимостью</p>
         </div>
 
-        <div className="grid gap-7 md:grid-cols-2 md:gap-x-16 md:gap-y-12 lg:gap-x-24">
+        {isLoading && <p className="font-mono text-sm text-foreground/50">Загружаем услуги...</p>}
+        <div className={`grid gap-7 md:grid-cols-2 ${services.length > 4 ? "md:gap-x-10 md:gap-y-8 lg:grid-cols-3" : "md:gap-x-16 md:gap-y-12 lg:gap-x-24"}`}>
           {services.map((service, i) => (
             <ServiceCard key={i} service={service} index={i} isVisible={isVisible} />
           ))}
@@ -67,7 +50,7 @@ function ServiceCard({
   index,
   isVisible,
 }: {
-  service: (typeof services)[number]
+  service: Service
   index: number
   isVisible: boolean
 }) {
@@ -97,9 +80,9 @@ function ServiceCard({
       }}
     >
       <div className="mb-3 flex items-center gap-3">
-        <Icon name={service.icon} size={16} className="text-primary" />
+        <Icon name={service.icon} fallback="Scale" size={16} className="text-primary" />
         <div className="h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-12 group-hover:bg-primary" />
-        <span className="font-mono text-xs text-foreground/60">0{index + 1}</span>
+        <span className="font-mono text-xs text-foreground/60">{String(index + 1).padStart(2, "0")}</span>
       </div>
       <h3 className="mb-2 font-serif text-2xl font-medium text-foreground md:text-3xl">{service.title}</h3>
       <p className="mb-2 max-w-md text-sm leading-relaxed text-foreground/80 md:text-base">{service.description}</p>

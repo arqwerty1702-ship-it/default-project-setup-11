@@ -39,9 +39,30 @@ export interface RawCase {
   sort_order: number
 }
 
+export interface RawService {
+  id: number
+  title: string
+  description: string
+  price: string
+  icon: string
+  sort_order: number
+}
+
+export interface SiteSettings {
+  phone?: string
+  email?: string
+  address?: string
+  hours?: string
+  telegram?: string
+  whatsapp?: string
+  vk?: string
+}
+
 export interface RawContent {
   articles: RawArticle[]
   cases: RawCase[]
+  services: RawService[]
+  settings: SiteSettings
 }
 
 export const toArticle = (a: RawArticle): Article => ({

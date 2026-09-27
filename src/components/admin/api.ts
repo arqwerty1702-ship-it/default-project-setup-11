@@ -1,6 +1,6 @@
 import { CONTENT_URL, type RawContent } from "@/data/articles"
 
-export type ContentType = "articles" | "cases"
+export type ContentType = "articles" | "cases" | "services"
 
 const KEY = "ld_admin_password"
 
