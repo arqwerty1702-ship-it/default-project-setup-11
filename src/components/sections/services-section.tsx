@@ -1,6 +1,7 @@
 import { useReveal } from "@/hooks/use-reveal"
 import Icon from "@/components/ui/icon"
 import { useContent } from "@/data/articles"
+import { useTexts } from "@/data/texts"
 
 const DIRECTIONS = ["top", "right", "left", "bottom"]
 
@@ -9,6 +10,7 @@ type Service = { icon: string; title: string; description: string; price: string
 export function ServicesSection() {
   const { ref, isVisible } = useReveal(0.3)
   const { data, isLoading } = useContent()
+  const t = useTexts()
   const services: Service[] = (data?.services ?? []).map((s, i) => ({
     icon: s.icon || "Scale",
     title: s.title,
@@ -29,9 +31,9 @@ export function ServicesSection() {
           }`}
         >
           <h2 className="mb-2 font-serif text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Услуги
+            {t("services_title")}
           </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Всё, что связано с недвижимостью</p>
+          <p className="font-mono text-sm text-foreground/60 md:text-base">{t("services_subtitle")}</p>
         </div>
 
         {isLoading && <p className="font-mono text-sm text-foreground/50">Загружаем услуги...</p>}

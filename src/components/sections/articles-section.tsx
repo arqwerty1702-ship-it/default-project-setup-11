@@ -7,20 +7,24 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { SectionTabs } from "@/components/section-tabs"
 import { Pager } from "@/components/pager"
 import { CasesList } from "@/components/sections/work-section"
+import { useTexts } from "@/data/texts"
 
-const TABS = ["Статьи", "Практика"] as const
+type Tab = "articles" | "cases"
 
 export function ArticlesSection() {
   const { ref, isVisible } = useReveal(0.3)
   const [active, setActive] = useState<Article | null>(null)
-  const [filter, setFilter] = useState<string>("Все")
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Статьи")
+  const t = useTexts()
+  const ALL = "__all__"
+  const [filter, setFilter] = useState<string>(ALL)
+  const [tab, setTab] = useState<Tab>("articles")
+  const tabLabels: Record<Tab, string> = { articles: t("articles_tab_articles"), cases: t("articles_tab_cases") }
   const { data, isLoading } = useContent()
   const articles = (data?.articles ?? []).map(toArticle)
   const cases = data?.cases ?? []
 
-  const categories = ["Все", ...Array.from(new Set(articles.map((a) => a.category)))]
-  const filtered = filter === "Все" ? articles : articles.filter((a) => a.category === filter)
+  const categories = [ALL, ...Array.from(new Set(articles.map((a) => a.category)))]
+  const filtered = filter === ALL ? articles : articles.filter((a) => a.category === filter)
   const [page, setPage] = useState(0)
   const pages = Math.max(1, Math.ceil(filtered.length / 3))
   const current = Math.min(page, pages - 1)
@@ -39,14 +43,18 @@ export function ArticlesSection() {
         >
           <div>
             <h2 className="mb-2 font-serif text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl">
-              Статьи и практика
+              {t("articles_title")}
             </h2>
             <p className="mb-5 font-mono text-sm text-foreground/60 md:text-base">
-              {tab === "Статьи" ? "/ Разбираем актуальные вопросы" : "/ Дела, которые мы выиграли"}
+              {tab === "articles" ? t("articles_subtitle") : t("cases_subtitle")}
             </p>
-            <SectionTabs tabs={TABS} value={tab} onChange={setTab} />
+            <SectionTabs
+              tabs={[tabLabels.articles, tabLabels.cases]}
+              value={tabLabels[tab]}
+              onChange={(v) => setTab(v === tabLabels.cases ? "cases" : "articles")}
+            />
           </div>
-          <div className={`flex flex-wrap gap-2 ${tab === "Статьи" ? "" : "hidden"}`}>
+          <div className={`flex flex-wrap gap-2 ${tab === "articles" ? "" : "hidden"}`}>
             {categories.map((c) => (
               <button
                 key={c}
@@ -60,22 +68,22 @@ export function ArticlesSection() {
                     : "border-foreground/15 bg-foreground/5 text-foreground/70 backdrop-blur-md hover:border-foreground/30 hover:text-foreground"
                 }`}
               >
-                {c}
+                {c === ALL ? t("articles_filter_all") : c}
               </button>
             ))}
           </div>
         </div>
 
-        {tab === "Практика" && <CasesList cases={cases} isVisible={isVisible} />}
+        {tab === "cases" && <CasesList cases={cases} isVisible={isVisible} note={t("cases_note")} />}
 
-        {tab === "Статьи" && isLoading && (
+        {tab === "articles" && isLoading && (
           <p className="font-mono text-sm text-foreground/50">Загружаем статьи...</p>
         )}
-        {tab === "Статьи" && !isLoading && filtered.length === 0 && (
+        {tab === "articles" && !isLoading && filtered.length === 0 && (
           <p className="font-mono text-sm text-foreground/50">Статей пока нет</p>
         )}
 
-        <div className={`grid gap-4 md:grid-cols-3 md:gap-6 ${tab === "Статьи" ? "" : "hidden"}`}>
+        <div className={`grid gap-4 md:grid-cols-3 md:gap-6 ${tab === "articles" ? "" : "hidden"}`}>
           {list.map((article, i) => (
             <button
               key={article.id}
@@ -96,7 +104,7 @@ export function ArticlesSection() {
               <div className="mt-auto flex items-center justify-between border-t border-foreground/10 pt-4">
                 <span className="font-mono text-xs text-foreground/40">{article.date}</span>
                 <span className="flex items-center gap-1 text-sm text-foreground transition-colors group-hover:text-primary">
-                  Читать
+                  {t("articles_read")}
                   <Icon name="ArrowUpRight" size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </span>
               </div>
@@ -104,7 +112,7 @@ export function ArticlesSection() {
           ))}
         </div>
 
-        {tab === "Статьи" && pages > 1 && (
+        {tab === "articles" && pages > 1 && (
           <Pager page={current} pages={pages} onChange={setPage} />
         )}
       </div>
@@ -132,7 +140,7 @@ export function ArticlesSection() {
                   ))}
                 </div>
                 <div className="mt-8 rounded-xl border border-primary/30 bg-primary/10 p-5 text-sm text-foreground/90">
-                  Остались вопросы по вашей ситуации? Оставьте заявку в разделе «Контакты» — первичная консультация бесплатна.
+                  {t("articles_cta")}
                 </div>
               </div>
             </ScrollArea>

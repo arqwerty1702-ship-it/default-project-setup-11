@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Pager } from "@/components/pager"
 import type { CaseItem } from "@/data/articles"
 
-export function CasesList({ cases, isVisible }: { cases: CaseItem[]; isVisible: boolean }) {
+export function CasesList({ cases, isVisible, note }: { cases: CaseItem[]; isVisible: boolean; note: string }) {
   const [page, setPage] = useState(0)
   const pages = Math.max(1, Math.ceil(cases.length / 3))
   const current = Math.min(page, pages - 1)
@@ -32,7 +32,7 @@ export function CasesList({ cases, isVisible }: { cases: CaseItem[]; isVisible: 
       </div>
       {pages > 1 && <Pager page={current} pages={pages} onChange={setPage} />}
       <p className="mt-6 max-w-xl font-mono text-xs text-foreground/50 md:text-sm">
-        Имена клиентов не раскрываем — адвокатская тайна. Подробности дел готовы обсудить на консультации.
+        {note}
       </p>
     </div>
   )

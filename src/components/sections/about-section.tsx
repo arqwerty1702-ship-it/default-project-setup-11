@@ -1,23 +1,25 @@
-const stats = [
-  { value: "1 200+", label: "Сделок", sublabel: "Проверено и сопровождено" },
-  { value: "11", label: "Лет", sublabel: "Практики в сфере недвижимости" },
-  { value: "87%", label: "Выигранных дел", sublabel: "В судах общей юрисдикции и арбитраже" },
-]
+import { useTexts } from "@/data/texts"
+import { AccentText } from "@/components/rich-text"
 
 export function AboutContent({ onConsult }: { onConsult?: () => void }) {
+  const t = useTexts()
+  const stats = [1, 2, 3]
+    .map((n) => ({ value: t(`stat${n}_value`), label: t(`stat${n}_label`), sublabel: t(`stat${n}_sub`) }))
+    .filter((s) => s.value.trim())
+  const paragraphs = t("about_text").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+
   return (
     <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 md:grid-cols-2 md:gap-16 lg:gap-24">
       <div>
         <h2 className="mb-4 font-serif text-4xl font-medium leading-[1.0] tracking-tight text-foreground md:mb-8 md:text-6xl lg:text-7xl">
-          Право на вашей <span className="italic text-primary">стороне</span>
+          <AccentText text={t("about_title")} />
         </h2>
         <div className="space-y-3 md:space-y-4">
-          <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-            «Legal Dome» — команда юристов и адвокатов, которые более 11 лет работают только с недвижимостью: от покупки первой квартиры до многолетних земельных споров.
-          </p>
-          <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-            Мы честно оцениваем шансы до начала работы, фиксируем стоимость в договоре и держим клиента в курсе каждого шага.
-          </p>
+          {paragraphs.map((p, i) => (
+            <p key={i} className="max-w-md whitespace-pre-line text-sm leading-relaxed text-foreground/90 md:text-lg">
+              {p}
+            </p>
+          ))}
         </div>
         {onConsult && (
           <button
@@ -25,7 +27,7 @@ export function AboutContent({ onConsult }: { onConsult?: () => void }) {
             onClick={onConsult}
             className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 md:mt-8"
           >
-            Записаться на консультацию
+            {t("about_button")}
           </button>
         )}
       </div>

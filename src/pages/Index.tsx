@@ -5,9 +5,11 @@ import { ContactSection } from "@/components/sections/contact-section"
 import { ArticlesSection } from "@/components/sections/articles-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState } from "react"
+import { useTexts } from "@/data/texts"
+import { AccentText } from "@/components/rich-text"
 
-const NAV = ["Главная", "Услуги", "Статьи", "Контакты"]
-const LAST = NAV.length - 1
+const NAV_KEYS = ["nav_home", "nav_services", "nav_articles", "nav_contacts"]
+const LAST = NAV_KEYS.length - 1
 
 export default function Index() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -17,6 +19,7 @@ export default function Index() {
   const touchStartX = useRef(0)
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number>()
+  const t = useTexts()
 
   useEffect(() => {
     const checkShaderReady = () => {
@@ -219,20 +222,20 @@ export default function Index() {
           onClick={() => scrollToSection(0)}
           className="flex items-center gap-2 transition-transform hover:scale-105"
         >
-          <img src="/logo-mark.png" alt="Legal Dome" className="h-12 w-12 object-contain" />
-          <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">Legal Dome</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">юридическое бюро</span></span>
+          <img src="/logo-mark.png" alt={t("brand_name")} className="h-12 w-12 object-contain" />
+          <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">{t("brand_name")}</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">{t("brand_tagline")}</span></span>
         </button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {NAV.map((item, index) => (
+          {NAV_KEYS.map((key, index) => (
             <button
-              key={item}
+              key={key}
               onClick={() => scrollToSection(index)}
               className={`group relative font-sans text-sm font-medium transition-colors ${
                 currentSection === index ? "text-foreground" : "text-foreground/80 hover:text-foreground"
               }`}
             >
-              {item}
+              {t(key)}
               <span
                 className={`absolute -bottom-1 left-0 h-px bg-foreground transition-all duration-300 ${
                   currentSection === index ? "w-full" : "w-0 group-hover:w-full"
@@ -243,7 +246,7 @@ export default function Index() {
         </div>
 
         <MagneticButton variant="secondary" onClick={() => scrollToSection(LAST)}>
-          Консультация
+          {t("nav_cta")}
         </MagneticButton>
       </nav>
 
@@ -259,16 +262,16 @@ export default function Index() {
         <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
           <div className="max-w-3xl">
             <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
-              <p className="font-mono text-xs text-foreground/90">Юридическое бюро · недвижимость</p>
+              <p className="font-mono text-xs text-foreground/90">{t("hero_badge")}</p>
             </div>
             <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-serif text-6xl font-medium leading-[1.0] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
-                Юридический фундамент <em className="font-normal italic text-primary">вашей</em> недвижимости
+                <AccentText text={t("hero_title")} />
               </span>
             </h1>
             <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
               <span className="text-pretty">
-                Проверяем квартиры и участки, сопровождаем сделки, защищаем дольщиков и собственников в суде. Говорим простым языком и отвечаем за результат.
+                {t("hero_text")}
               </span>
             </p>
             <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
@@ -277,17 +280,17 @@ export default function Index() {
                 variant="primary"
                 onClick={() => scrollToSection(LAST)}
               >
-                Получить консультацию
+                {t("hero_btn_primary")}
               </MagneticButton>
               <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(1)}>
-                Услуги и цены
+                {t("hero_btn_secondary")}
               </MagneticButton>
             </div>
           </div>
 
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
             <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-foreground/80">Листайте вправо</p>
+              <p className="font-mono text-xs text-foreground/80">{t("hero_scroll_hint")}</p>
               <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-foreground/80" />
               </div>

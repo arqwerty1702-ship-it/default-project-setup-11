@@ -1,4 +1,5 @@
 import json
+import re
 import os
 import hmac
 import hashlib
@@ -17,7 +18,6 @@ FIELDS = {
     'services': ['title', 'description', 'price', 'icon', 'sort_order'],
 }
 
-SETTINGS_KEYS = ['phone', 'email', 'address', 'hours', 'telegram', 'whatsapp', 'vk']
 
 
 def resp(status: int, data) -> dict:
@@ -101,12 +101,13 @@ def handler(event: dict, context) -> dict:
     table = body.get('type') or params.get('type')
     if table == 'settings' and method == 'PUT':
         values = body.get('settings') or {}
-        for k in SETTINGS_KEYS:
-            if k in values:
-                cur.execute(
-                    f"INSERT INTO {schema}.site_settings (key, value) VALUES ({q(k)}, {q(values[k])}) "
-                    f"ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
-                )
+        for k in values:
+            if not re.fullmatch(r'[a-z0-9_]{1,60}', str(k)):
+                continue
+            cur.execute(
+                f"INSERT INTO {schema}.site_settings (key, value) VALUES ({q(k)}, {q(str(values[k])[:20000])}) "
+                f"ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+            )
         data = fetch_all(cur, schema)
         conn.close()
         return resp(200, data)

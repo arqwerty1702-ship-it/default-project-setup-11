@@ -5,20 +5,24 @@ import Icon from "@/components/ui/icon"
 import { SectionTabs } from "@/components/section-tabs"
 import { AboutContent } from "@/components/sections/about-section"
 import { useContent } from "@/data/articles"
+import { useTexts } from "@/data/texts"
+import { AccentText } from "@/components/rich-text"
 
-const TABS = ["Контакты", "О нас"] as const
-
-const topics = ["Сделка", "Застройщик", "Земля", "Суд"]
+type Tab = "contacts" | "about"
 
 type Errors = Partial<Record<"name" | "phone" | "message", string>>
 
 export function ContactSection() {
   const { ref, isVisible } = useReveal(0.3)
-  const [formData, setFormData] = useState({ name: "", phone: "", message: "", topic: topics[0] })
+  const t = useTexts()
+  const topics = t("form_topics").split(",").map((x) => x.trim()).filter(Boolean)
+  const [formData, setFormData] = useState({ name: "", phone: "", message: "", topic: "" })
+  const topic = topics.includes(formData.topic) ? formData.topic : topics[0] ?? ""
   const [errors, setErrors] = useState<Errors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Контакты")
+  const [tab, setTab] = useState<Tab>("contacts")
+  const tabLabels: Record<Tab, string> = { contacts: t("contacts_tab_contacts"), about: t("contacts_tab_about") }
   const { data } = useContent()
   const st = data?.settings ?? {}
   const phone = st.phone || ""
@@ -47,7 +51,7 @@ export function ContactSection() {
     await new Promise((resolve) => setTimeout(resolve, 1200))
     setIsSubmitting(false)
     setSubmitSuccess(true)
-    setFormData({ name: "", phone: "", message: "", topic: topics[0] })
+    setFormData({ name: "", phone: "", message: "", topic: "" })
     setTimeout(() => setSubmitSuccess(false), 6000)
   }
 
@@ -63,10 +67,14 @@ export function ContactSection() {
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-6 md:mb-10">
-          <SectionTabs tabs={TABS} value={tab} onChange={setTab} />
+          <SectionTabs
+            tabs={[tabLabels.contacts, tabLabels.about]}
+            value={tabLabels[tab]}
+            onChange={(v) => setTab(v === tabLabels.about ? "about" : "contacts")}
+          />
         </div>
-        {tab === "О нас" && <AboutContent onConsult={() => setTab("Контакты")} />}
-        <div className={`grid gap-8 md:grid-cols-[1.2fr_1fr] md:gap-16 lg:gap-24 ${tab === "Контакты" ? "" : "hidden"}`}>
+        {tab === "about" && <AboutContent onConsult={() => setTab("contacts")} />}
+        <div className={`grid gap-8 md:grid-cols-[1.2fr_1fr] md:gap-16 lg:gap-24 ${tab === "contacts" ? "" : "hidden"}`}>
           <div className="flex flex-col justify-center">
             <div
               className={`mb-6 transition-all duration-700 md:mb-12 ${
@@ -74,11 +82,9 @@ export function ContactSection() {
               }`}
             >
               <h2 className="mb-2 font-serif text-4xl font-medium leading-[1.0] tracking-tight text-foreground md:mb-3 md:text-6xl lg:text-7xl">
-                Расскажите
-                <br />
-                <span className="italic text-primary">о ситуации</span>
+                <AccentText text={t("contacts_title")} />
               </h2>
-              <p className="font-mono text-xs text-foreground/60 md:text-base">/ Первичная консультация — бесплатно</p>
+              <p className="font-mono text-xs text-foreground/60 md:text-base">{t("contacts_subtitle")}</p>
             </div>
 
             <div className="space-y-4 md:space-y-7">
@@ -91,7 +97,7 @@ export function ContactSection() {
               >
                 <div className="mb-1 flex items-center gap-2">
                   <Icon name="Phone" size={12} className="text-primary" />
-                  <span className="font-mono text-xs text-foreground/60">Телефон</span>
+                  <span className="font-mono text-xs text-foreground/60">{t("label_phone")}</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-primary md:text-2xl">
                   {phone}
@@ -107,7 +113,7 @@ export function ContactSection() {
               >
                 <div className="mb-1 flex items-center gap-2">
                   <Icon name="Mail" size={12} className="text-primary" />
-                  <span className="font-mono text-xs text-foreground/60">Email</span>
+                  <span className="font-mono text-xs text-foreground/60">{t("label_email")}</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-primary md:text-2xl">
                   {email}
@@ -122,7 +128,7 @@ export function ContactSection() {
               >
                 <div className="mb-1 flex items-center gap-2">
                   <Icon name="MapPin" size={12} className="text-primary" />
-                  <span className="font-mono text-xs text-foreground/60">Офис</span>
+                  <span className="font-mono text-xs text-foreground/60">{t("label_office")}</span>
                 </div>
                 <p className="text-base text-foreground md:text-2xl">{st.address}</p>
                 <p className="font-mono text-xs text-foreground/50">{st.hours}</p>
@@ -157,20 +163,20 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "150ms" }}
               >
-                <label className="mb-2 block font-mono text-xs text-foreground/60">Вопрос</label>
+                <label className="mb-2 block font-mono text-xs text-foreground/60">{t("form_topic_label")}</label>
                 <div className="flex flex-wrap gap-2">
-                  {topics.map((t) => (
+                  {topics.map((tp) => (
                     <button
                       type="button"
-                      key={t}
-                      onClick={() => setFormData({ ...formData, topic: t })}
+                      key={tp}
+                      onClick={() => setFormData({ ...formData, topic: tp })}
                       className={`rounded-full border px-3 py-1 font-mono text-xs transition-all ${
-                        formData.topic === t
+                        topic === tp
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-foreground/20 text-foreground/70 hover:border-foreground/40"
                       }`}
                     >
-                      {t}
+                      {tp}
                     </button>
                   ))}
                 </div>
@@ -182,13 +188,13 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "250ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-foreground/60">Имя</label>
+                <label className="mb-1 block font-mono text-xs text-foreground/60">{t("form_name_label")}</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className={`${field} ${border("name")}`}
-                  placeholder="Как к вам обращаться"
+                  placeholder={t("form_name_placeholder")}
                 />
                 {errors.name && <p className="mt-1 font-mono text-xs text-red-300">{errors.name}</p>}
               </div>
@@ -199,13 +205,13 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "350ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-foreground/60">Телефон</label>
+                <label className="mb-1 block font-mono text-xs text-foreground/60">{t("form_phone_label")}</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className={`${field} ${border("phone")}`}
-                  placeholder="+7 900 000-00-00"
+                  placeholder={t("form_phone_placeholder")}
                 />
                 {errors.phone && <p className="mt-1 font-mono text-xs text-red-300">{errors.phone}</p>}
               </div>
@@ -216,13 +222,13 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "450ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-foreground/60">Коротко о ситуации</label>
+                <label className="mb-1 block font-mono text-xs text-foreground/60">{t("form_message_label")}</label>
                 <textarea
                   rows={3}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className={`${field} resize-none ${border("message")}`}
-                  placeholder="Например: покупаю квартиру, хочу проверить продавца"
+                  placeholder={t("form_message_placeholder")}
                 />
                 {errors.message && <p className="mt-1 font-mono text-xs text-red-300">{errors.message}</p>}
               </div>
@@ -234,15 +240,15 @@ export function ContactSection() {
                 style={{ transitionDelay: "600ms" }}
               >
                 <MagneticButton variant="primary" size="lg" className="w-full">
-                  {isSubmitting ? "Отправляем..." : "Получить консультацию"}
+                  {isSubmitting ? "Отправляем..." : t("form_submit")}
                 </MagneticButton>
                 {submitSuccess ? (
                   <p className="mt-3 text-center font-mono text-sm text-primary">
-                    Заявка принята. Юрист перезвонит в течение 30 минут.
+                    {t("form_success")}
                   </p>
                 ) : (
                   <p className="mt-3 text-center font-mono text-[11px] text-foreground/40">
-                    Нажимая кнопку, вы соглашаетесь на обработку персональных данных
+                    {t("form_consent")}
                   </p>
                 )}
               </div>

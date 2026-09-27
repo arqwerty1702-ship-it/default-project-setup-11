@@ -1,8 +1,13 @@
-import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,73 +17,120 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import Icon from "@/components/ui/icon"
-import { SectionTabs } from "@/components/section-tabs"
-import { AdminLogin } from "@/components/admin/AdminLogin"
-import { ItemForm, emptyItem, type FormItem } from "@/components/admin/ItemForm"
-import { SettingsForm } from "@/components/admin/SettingsForm"
-import { ChangePassword } from "@/components/admin/ChangePassword"
-import { adminRequest, clearPassword, getPassword, type ContentType } from "@/components/admin/api"
-import { useContent } from "@/data/articles"
+} from "@/components/ui/alert-dialog";
+import Icon from "@/components/ui/icon";
+import { SectionTabs } from "@/components/section-tabs";
+import { AdminLogin } from "@/components/admin/AdminLogin";
+import {
+  ItemForm,
+  emptyItem,
+  type FormItem,
+} from "@/components/admin/ItemForm";
+import { SettingsForm } from "@/components/admin/SettingsForm";
+import { TextsForm } from "@/components/admin/TextsForm";
+import { ChangePassword } from "@/components/admin/ChangePassword";
+import {
+  adminRequest,
+  clearPassword,
+  getPassword,
+  type ContentType,
+} from "@/components/admin/api";
+import { useContent } from "@/data/articles";
 
-const TABS = ["Статьи", "Практика", "Услуги", "Контакты"] as const
-type Tab = (typeof TABS)[number]
-const TYPE: Record<Exclude<Tab, "Контакты">, ContentType> = { Статьи: "articles", Практика: "cases", Услуги: "services" }
-const NEW_LABEL: Record<ContentType, string> = { articles: "Новая статья", cases: "Новое дело", services: "Новая услуга" }
+const TABS = ["Тексты", "Услуги", "Статьи", "Практика", "Контакты"] as const;
+type Tab = (typeof TABS)[number];
+const TYPE: Record<Exclude<Tab, "Контакты" | "Тексты">, ContentType> = {
+  Статьи: "articles",
+  Практика: "cases",
+  Услуги: "services",
+};
+const NEW_LABEL: Record<ContentType, string> = {
+  articles: "Новая статья",
+  cases: "Новое дело",
+  services: "Новая услуга",
+};
 
 export default function Admin() {
-  const [authed, setAuthed] = useState(!!getPassword())
-  const [tab, setTab] = useState<Tab>("Статьи")
-  const [editing, setEditing] = useState<FormItem | null>(null)
-  const [removing, setRemoving] = useState<{ id: number; title: string } | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [pwOpen, setPwOpen] = useState(false)
-  const { data, isLoading } = useContent()
-  const qc = useQueryClient()
-  const isSettings = tab === "Контакты"
-  const type: ContentType = isSettings ? "articles" : TYPE[tab]
+  const [authed, setAuthed] = useState(!!getPassword());
+  const [tab, setTab] = useState<Tab>("Тексты");
+  const [editing, setEditing] = useState<FormItem | null>(null);
+  const [removing, setRemoving] = useState<{
+    id: number;
+    title: string;
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const { data, isLoading } = useContent();
+  const qc = useQueryClient();
+  const isTexts = tab === "Тексты";
+  const isSettings = tab === "Контакты" || isTexts;
+  const type: ContentType =
+    tab === "Контакты" || tab === "Тексты" ? "articles" : TYPE[tab];
 
-  if (!authed) return <Wrapper><AdminLogin onSuccess={() => setAuthed(true)} /></Wrapper>
+  if (!authed)
+    return (
+      <Wrapper>
+        <AdminLogin onSuccess={() => setAuthed(true)} />
+      </Wrapper>
+    );
 
-  const run = async (method: "POST" | "PUT" | "DELETE", body: Record<string, unknown>, msg: string) => {
-    setSaving(true)
+  const run = async (
+    method: "POST" | "PUT" | "DELETE",
+    body: Record<string, unknown>,
+    msg: string,
+  ) => {
+    setSaving(true);
     try {
-      const res = await adminRequest(method, { type, ...body })
+      const res = await adminRequest(method, { type, ...body });
       qc.setQueryData(["content"], {
         articles: res.articles,
         cases: res.cases,
         services: res.services,
         settings: res.settings,
-      })
-      toast.success(msg)
-      return true
+      });
+      toast.success(msg);
+      return true;
     } catch (e) {
-      const text = e instanceof Error ? e.message : "Ошибка"
-      toast.error(text)
+      const text = e instanceof Error ? e.message : "Ошибка";
+      toast.error(text);
       if (text === "Неверный пароль") {
-        clearPassword()
-        setAuthed(false)
+        clearPassword();
+        setAuthed(false);
       }
-      return false
+      return false;
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const save = async (item: FormItem) => {
     const ok = item.id
       ? await run("PUT", { id: item.id, item }, "Изменения сохранены")
-      : await run("POST", { item }, "Добавлено на сайт")
-    if (ok) setEditing(null)
-  }
+      : await run("POST", { item }, "Добавлено на сайт");
+    if (ok) setEditing(null);
+  };
 
   const items: { id: number; title: string; sub: string; raw: FormItem }[] =
     type === "articles"
-      ? (data?.articles ?? []).map((a) => ({ id: a.id, title: a.title, sub: `${a.category} · ${a.date_label}`, raw: a as unknown as FormItem }))
+      ? (data?.articles ?? []).map((a) => ({
+          id: a.id,
+          title: a.title,
+          sub: `${a.category} · ${a.date_label}`,
+          raw: a as unknown as FormItem,
+        }))
       : type === "cases"
-        ? (data?.cases ?? []).map((c) => ({ id: c.id, title: c.title, sub: `${c.category} · ${c.year}`, raw: c as unknown as FormItem }))
-        : (data?.services ?? []).map((v) => ({ id: v.id, title: v.title, sub: v.price, raw: v as unknown as FormItem }))
+        ? (data?.cases ?? []).map((c) => ({
+            id: c.id,
+            title: c.title,
+            sub: `${c.category} · ${c.year}`,
+            raw: c as unknown as FormItem,
+          }))
+        : (data?.services ?? []).map((v) => ({
+            id: v.id,
+            title: v.title,
+            sub: v.price,
+            raw: v as unknown as FormItem,
+          }));
 
   return (
     <Wrapper>
@@ -87,7 +139,9 @@ export default function Admin() {
           <a href="/" className="flex items-center gap-3">
             <img src="/logo-mark.png" alt="" className="h-9 w-9" />
             <div className="leading-tight">
-              <div className="font-serif text-xl text-foreground">Legal Dome</div>
+              <div className="font-serif text-xl text-foreground">
+                Legal Dome
+              </div>
               <div className="text-xs text-muted-foreground">Админ-панель</div>
             </div>
           </a>
@@ -106,8 +160,8 @@ export default function Admin() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                clearPassword()
-                setAuthed(false)
+                clearPassword();
+                setAuthed(false);
               }}
             >
               <Icon name="LogOut" size={16} className="mr-1.5" />
@@ -131,11 +185,23 @@ export default function Admin() {
         {isSettings ? (
           isLoading ? (
             <p className="text-muted-foreground">Загрузка...</p>
+          ) : isTexts ? (
+            <TextsForm
+              initial={
+                (data?.settings ?? {}) as Record<string, string | undefined>
+              }
+              saving={saving}
+              onSave={(settings) =>
+                run("PUT", { type: "settings", settings }, "Тексты сохранены")
+              }
+            />
           ) : (
             <SettingsForm
               initial={data?.settings ?? {}}
               saving={saving}
-              onSave={(settings) => run("PUT", { type: "settings", settings }, "Контакты сохранены")}
+              onSave={(settings) =>
+                run("PUT", { type: "settings", settings }, "Контакты сохранены")
+              }
             />
           )
         ) : isLoading ? (
@@ -152,11 +218,20 @@ export default function Admin() {
                 className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4"
               >
                 <div className="min-w-0">
-                  <div className="truncate font-medium text-foreground">{it.title}</div>
-                  <div className="truncate text-sm text-muted-foreground">{it.sub}</div>
+                  <div className="truncate font-medium text-foreground">
+                    {it.title}
+                  </div>
+                  <div className="truncate text-sm text-muted-foreground">
+                    {it.sub}
+                  </div>
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => setEditing({ ...it.raw })} aria-label="Редактировать">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditing({ ...it.raw })}
+                    aria-label="Редактировать"
+                  >
                     <Icon name="Pencil" size={18} />
                   </Button>
                   <Button
@@ -196,19 +271,26 @@ export default function Admin() {
 
       <ChangePassword open={pwOpen} onOpenChange={setPwOpen} />
 
-      <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
+      <AlertDialog
+        open={!!removing}
+        onOpenChange={(o) => !o && setRemoving(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Удалить запись?</AlertDialogTitle>
-            <AlertDialogDescription>«{removing?.title}» исчезнет с сайта. Это действие нельзя отменить.</AlertDialogDescription>
+            <AlertDialogDescription>
+              «{removing?.title}» исчезнет с сайта. Это действие нельзя
+              отменить.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Отмена</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 text-white hover:bg-red-600"
               onClick={async () => {
-                if (removing) await run("DELETE", { id: removing.id }, "Удалено")
-                setRemoving(null)
+                if (removing)
+                  await run("DELETE", { id: removing.id }, "Удалено");
+                setRemoving(null);
               }}
             >
               Удалить
@@ -217,9 +299,13 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
     </Wrapper>
-  )
+  );
 }
 
 function Wrapper({ children }: { children: React.ReactNode }) {
-  return <div className="h-screen overflow-y-auto bg-background text-foreground">{children}</div>
+  return (
+    <div className="h-screen overflow-y-auto bg-background text-foreground">
+      {children}
+    </div>
+  );
 }
