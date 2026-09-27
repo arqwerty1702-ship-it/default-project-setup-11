@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 
 export function useReveal(threshold = 0.3) {
   const ref = useRef<HTMLElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(() => typeof window !== "undefined" && window.innerWidth < 768)
 
   useEffect(() => {
     const observer = new IntersectionObserver(

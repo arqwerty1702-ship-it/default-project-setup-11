@@ -33,7 +33,7 @@ export function ArticlesSection() {
   return (
     <section
       ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
+      className="flex w-screen shrink-0 snap-start items-center px-5 pb-16 pt-24 md:h-screen md:px-12 md:py-0 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
         <div
@@ -90,7 +90,7 @@ export function ArticlesSection() {
               onClick={() => setActive(article)}
               className={`group flex flex-col rounded-2xl border border-foreground/10 bg-background/40 p-5 text-left backdrop-blur-xl transition-all duration-700 hover:-translate-y-1 hover:border-primary/50 hover:bg-background/60 md:p-7 ${
                 isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
-              } ${i > 0 ? "hidden md:flex" : ""}`}
+              }`}
               style={{ transitionDelay: `${150 + i * 120}ms` }}
             >
               <div className="mb-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-primary md:mb-6">

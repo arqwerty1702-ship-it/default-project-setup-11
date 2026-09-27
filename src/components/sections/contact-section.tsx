@@ -80,7 +80,7 @@ export function ContactSection() {
   return (
     <section
       ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start items-center px-4 pt-20 md:px-12 md:pt-0 lg:px-16"
+      className="flex w-screen shrink-0 snap-start items-center px-5 pb-16 pt-24 md:h-screen md:px-12 md:py-0 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-6 md:mb-10">

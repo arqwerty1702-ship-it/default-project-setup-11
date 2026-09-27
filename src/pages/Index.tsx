@@ -7,6 +7,8 @@ import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState } from "react"
 import { useTexts } from "@/data/texts"
 import { AccentText } from "@/components/rich-text"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { MobileMenu } from "@/components/mobile-menu"
 
 const NAV_KEYS = ["nav_home", "nav_services", "nav_articles", "nav_contacts"]
 const LAST = NAV_KEYS.length - 1
@@ -20,6 +22,7 @@ export default function Index() {
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number>()
   const t = useTexts()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const checkShaderReady = () => {
@@ -52,6 +55,13 @@ export default function Index() {
   }, [])
 
   const scrollToSection = (index: number) => {
+    const el = scrollContainerRef.current
+    if (el && window.innerWidth < 768) {
+      const target = el.children[index] as HTMLElement | undefined
+      el.scrollTo({ top: target ? target.offsetTop : 0, behavior: "smooth" })
+      setCurrentSection(index)
+      return
+    }
     if (scrollContainerRef.current) {
       const sectionWidth = scrollContainerRef.current.offsetWidth
       scrollContainerRef.current.scrollTo({
@@ -63,6 +73,7 @@ export default function Index() {
   }
 
   useEffect(() => {
+    if (isMobile) return
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY.current = e.touches[0].clientY
       touchStartX.current = e.touches[0].clientX
@@ -103,9 +114,10 @@ export default function Index() {
         container.removeEventListener("touchend", handleTouchEnd)
       }
     }
-  }, [currentSection])
+  }, [currentSection, isMobile])
 
   useEffect(() => {
+    if (isMobile) return
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault()
@@ -135,9 +147,10 @@ export default function Index() {
         container.removeEventListener("wheel", handleWheel)
       }
     }
-  }, [currentSection])
+  }, [currentSection, isMobile])
 
   useEffect(() => {
+    if (isMobile) return
     const handleScroll = () => {
       if (scrollThrottleRef.current) return
 
@@ -172,10 +185,10 @@ export default function Index() {
         cancelAnimationFrame(scrollThrottleRef.current)
       }
     }
-  }, [currentSection])
+  }, [currentSection, isMobile])
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-background">
+    <main className="relative h-[100dvh] w-full overflow-hidden bg-background md:h-screen">
       <GrainOverlay />
 
       <div
@@ -214,7 +227,7 @@ export default function Index() {
       </div>
 
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
+        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-foreground/10 bg-background/75 px-4 py-3 backdrop-blur-lg transition-opacity duration-700 md:border-0 md:bg-transparent md:px-12 md:py-6 md:backdrop-blur-none ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -222,8 +235,8 @@ export default function Index() {
           onClick={() => scrollToSection(0)}
           className="flex items-center gap-2 transition-transform hover:scale-105"
         >
-          <img src="/logo-mark.png" alt={t("brand_name")} className="h-12 w-12 object-contain" />
-          <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">{t("brand_name")}</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">{t("brand_tagline")}</span></span>
+          <img src="/logo-mark.png" alt={t("brand_name")} className="h-10 w-10 object-contain md:h-12 md:w-12" />
+          <span className="flex flex-col items-start leading-none"><span className="font-serif text-xl font-semibold tracking-tight text-foreground md:text-2xl">{t("brand_name")}</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">{t("brand_tagline")}</span></span>
         </button>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -245,26 +258,34 @@ export default function Index() {
           ))}
         </div>
 
-        <MagneticButton variant="secondary" onClick={() => scrollToSection(LAST)}>
-          {t("nav_cta")}
-        </MagneticButton>
+        <div className="hidden md:block">
+          <MagneticButton variant="secondary" onClick={() => scrollToSection(LAST)}>
+            {t("nav_cta")}
+          </MagneticButton>
+        </div>
+        <MobileMenu
+          items={NAV_KEYS.map((key) => t(key))}
+          cta={t("nav_cta")}
+          onSelect={scrollToSection}
+          onCta={() => scrollToSection(LAST)}
+        />
       </nav>
 
       <div
         ref={scrollContainerRef}
         data-scroll-container
-        className={`relative z-10 flex h-screen overflow-x-auto overflow-y-hidden transition-opacity duration-700 ${
+        className={`relative z-10 flex h-full flex-col overflow-y-auto overflow-x-hidden transition-opacity duration-700 md:h-screen md:flex-row md:overflow-x-auto md:overflow-y-hidden ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {/* Hero Section */}
-        <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
+        <section className="relative flex min-h-[100dvh] w-screen shrink-0 flex-col justify-end px-5 pb-12 pt-24 md:min-h-screen md:px-12 md:pb-24">
           <div className="max-w-3xl">
             <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
               <p className="font-mono text-xs text-foreground/90">{t("hero_badge")}</p>
             </div>
-            <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-serif text-6xl font-medium leading-[1.0] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
+            <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-serif text-5xl font-medium leading-[1.0] sm:text-6xl tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
                 <AccentText text={t("hero_title")} />
               </span>
@@ -288,7 +309,7 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
+          <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-in fade-in duration-1000 delay-500 md:block">
             <div className="flex items-center gap-2">
               <p className="font-mono text-xs text-foreground/80">{t("hero_scroll_hint")}</p>
               <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
