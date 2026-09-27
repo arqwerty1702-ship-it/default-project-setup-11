@@ -1,5 +1,3 @@
-import { useReveal } from "@/hooks/use-reveal"
-
 const cases = [
   {
     number: "01",
@@ -24,42 +22,18 @@ const cases = [
   },
 ]
 
-export function WorkSection() {
-  const { ref, isVisible } = useReveal(0.3)
-
+export function CasesList({ isVisible }: { isVisible: boolean }) {
   return (
-    <section
-      ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
-    >
-      <div className="mx-auto w-full max-w-7xl">
-        <div
-          className={`mb-12 transition-all duration-700 md:mb-16 ${
-            isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
-          }`}
-        >
-          <h2 className="mb-2 font-serif text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Практика
-          </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Дела, которые мы выиграли</p>
-        </div>
-
-        <div className="space-y-6 md:space-y-8">
-          {cases.map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
-          ))}
-        </div>
-
-        <p
-          className={`mt-10 max-w-xl font-mono text-xs text-foreground/50 transition-all duration-700 md:text-sm ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          Имена клиентов не раскрываем — адвокатская тайна. Подробности дел готовы обсудить на консультации.
-        </p>
+    <div>
+      <div className="space-y-4 md:space-y-6">
+        {cases.map((project, i) => (
+          <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
+        ))}
       </div>
-    </section>
+      <p className="mt-8 max-w-xl font-mono text-xs text-foreground/50 md:text-sm">
+        Имена клиентов не раскрываем — адвокатская тайна. Подробности дел готовы обсудить на консультации.
+      </p>
+    </div>
   )
 }
 
@@ -72,16 +46,15 @@ function ProjectCard({
   index: number
   isVisible: boolean
 }) {
-  const getRevealClass = () => {
-    if (!isVisible) {
-      return project.direction === "left" ? "-translate-x-16 opacity-0" : "translate-x-16 opacity-0"
-    }
-    return "translate-x-0 opacity-100"
-  }
+  const reveal = !isVisible
+    ? project.direction === "left"
+      ? "-translate-x-16 opacity-0"
+      : "translate-x-16 opacity-0"
+    : "translate-x-0 opacity-100"
 
   return (
     <div
-      className={`group flex items-center justify-between gap-4 border-b border-foreground/10 py-5 transition-all duration-700 hover:border-primary/50 md:py-7 ${getRevealClass()}`}
+      className={`group flex items-center justify-between gap-4 border-b border-foreground/10 py-4 transition-all duration-700 hover:border-primary/50 md:py-6 ${reveal}`}
       style={{
         transitionDelay: `${index * 150}ms`,
         marginLeft: index % 2 === 0 ? "0" : "auto",

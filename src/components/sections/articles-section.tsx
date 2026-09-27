@@ -4,11 +4,16 @@ import Icon from "@/components/ui/icon"
 import { articles, type Article } from "@/data/articles"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { SectionTabs } from "@/components/section-tabs"
+import { CasesList } from "@/components/sections/work-section"
+
+const TABS = ["Статьи", "Практика"] as const
 
 export function ArticlesSection() {
   const { ref, isVisible } = useReveal(0.3)
   const [active, setActive] = useState<Article | null>(null)
   const [filter, setFilter] = useState<string>("Все")
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Статьи")
 
   const categories = ["Все", ...Array.from(new Set(articles.map((a) => a.category)))]
   const list = (filter === "Все" ? articles : articles.filter((a) => a.category === filter)).slice(0, 3)
@@ -26,11 +31,14 @@ export function ArticlesSection() {
         >
           <div>
             <h2 className="mb-2 font-serif text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl">
-              Статьи
+              Статьи и практика
             </h2>
-            <p className="font-mono text-sm text-foreground/60 md:text-base">/ Разбираем актуальные вопросы</p>
+            <p className="mb-5 font-mono text-sm text-foreground/60 md:text-base">
+              {tab === "Статьи" ? "/ Разбираем актуальные вопросы" : "/ Дела, которые мы выиграли"}
+            </p>
+            <SectionTabs tabs={TABS} value={tab} onChange={setTab} />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className={`flex flex-wrap gap-2 ${tab === "Статьи" ? "" : "hidden"}`}>
             {categories.map((c) => (
               <button
                 key={c}
@@ -47,7 +55,9 @@ export function ArticlesSection() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 md:gap-6">
+        {tab === "Практика" && <CasesList isVisible={isVisible} />}
+
+        <div className={`grid gap-4 md:grid-cols-3 md:gap-6 ${tab === "Статьи" ? "" : "hidden"}`}>
           {list.map((article, i) => (
             <button
               key={article.id}

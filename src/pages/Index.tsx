@@ -1,14 +1,12 @@
 import { Shader, ChromaFlow, Swirl } from "shaders/react"
 import { GrainOverlay } from "@/components/grain-overlay"
-import { WorkSection } from "@/components/sections/work-section"
 import { ServicesSection } from "@/components/sections/services-section"
-import { AboutSection } from "@/components/sections/about-section"
 import { ContactSection } from "@/components/sections/contact-section"
 import { ArticlesSection } from "@/components/sections/articles-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState } from "react"
 
-const NAV = ["Главная", "Практика", "Услуги", "Статьи", "О бюро", "Контакты"]
+const NAV = ["Главная", "Услуги", "Статьи", "Контакты"]
 const LAST = NAV.length - 1
 
 export default function Index() {
@@ -283,7 +281,7 @@ export default function Index() {
               >
                 Получить консультацию
               </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(2)}>
+              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(1)}>
                 Услуги и цены
               </MagneticButton>
             </div>
@@ -299,10 +297,8 @@ export default function Index() {
           </div>
         </section>
 
-        <WorkSection />
         <ServicesSection />
         <ArticlesSection />
-        <AboutSection scrollToSection={scrollToSection} />
         <ContactSection />
       </div>
 

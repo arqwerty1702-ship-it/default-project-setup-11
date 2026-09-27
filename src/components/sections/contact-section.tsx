@@ -2,6 +2,10 @@ import { useReveal } from "@/hooks/use-reveal"
 import { useState, type FormEvent } from "react"
 import { MagneticButton } from "@/components/magnetic-button"
 import Icon from "@/components/ui/icon"
+import { SectionTabs } from "@/components/section-tabs"
+import { AboutContent } from "@/components/sections/about-section"
+
+const TABS = ["Контакты", "О нас"] as const
 
 const topics = ["Сделка", "Застройщик", "Земля", "Суд"]
 
@@ -13,6 +17,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<Errors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Контакты")
 
   const validate = () => {
     const e: Errors = {}
@@ -47,14 +52,18 @@ export function ContactSection() {
       className="flex h-screen w-screen shrink-0 snap-start items-center px-4 pt-20 md:px-12 md:pt-0 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:gap-16 lg:gap-24">
+        <div className="mb-6 md:mb-10">
+          <SectionTabs tabs={TABS} value={tab} onChange={setTab} />
+        </div>
+        {tab === "О нас" && <AboutContent onConsult={() => setTab("Контакты")} />}
+        <div className={`grid gap-8 md:grid-cols-[1.2fr_1fr] md:gap-16 lg:gap-24 ${tab === "Контакты" ? "" : "hidden"}`}>
           <div className="flex flex-col justify-center">
             <div
               className={`mb-6 transition-all duration-700 md:mb-12 ${
                 isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
               }`}
             >
-              <h2 className="mb-2 font-serif text-4xl font-medium leading-[1.0] tracking-tight text-foreground md:mb-3 md:text-7xl lg:text-8xl">
+              <h2 className="mb-2 font-serif text-4xl font-medium leading-[1.0] tracking-tight text-foreground md:mb-3 md:text-6xl lg:text-7xl">
                 Расскажите
                 <br />
                 <span className="italic text-primary">о ситуации</span>
