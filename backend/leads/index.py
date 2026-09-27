@@ -132,9 +132,15 @@ def handler(event: dict, context) -> dict:
             try:
                 with smtplib.SMTP_SSL('smtp.mail.ru', 465, timeout=8) as server:
                     server.login(SMTP_LOGIN, new_pw)
-            except smtplib.SMTPAuthenticationError:
+            except smtplib.SMTPAuthenticationError as e:
+                reason = str(e)
+                print(f"smtp auth rejected: {reason[:200]}")
                 conn.close()
-                return resp(400, {'error': 'Mail.ru не принял пароль. Нужен именно пароль для внешних приложений'})
+                if 'REQUIRED' in reason or 'prilozheniya' in reason:
+                    msg = 'Это обычный пароль от почты. Mail.ru требует отдельный пароль для внешних приложений'
+                else:
+                    msg = 'Mail.ru не принял пароль. Создайте новый пароль для внешних приложений и вставьте его без пробелов'
+                return resp(400, {'error': msg})
             except Exception as e:
                 print(f"smtp check error: {e}")
                 conn.close()
