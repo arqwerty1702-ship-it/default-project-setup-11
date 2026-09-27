@@ -7,6 +7,9 @@ import { AboutContent } from "@/components/sections/about-section"
 import { useContent } from "@/data/articles"
 import { useTexts } from "@/data/texts"
 import { AccentText } from "@/components/rich-text"
+import func2url from "../../../backend/func2url.json"
+
+const LEADS_URL = (func2url as Record<string, string>).leads
 
 type Tab = "contacts" | "about"
 
@@ -21,6 +24,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<Errors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState("")
   const [tab, setTab] = useState<Tab>("contacts")
   const tabLabels: Record<Tab, string> = { contacts: t("contacts_tab_contacts"), about: t("contacts_tab_about") }
   const { data } = useContent()
@@ -48,11 +52,25 @@ export function ContactSection() {
     if (isSubmitting || !validate()) return
 
     setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    setIsSubmitting(false)
-    setSubmitSuccess(true)
-    setFormData({ name: "", phone: "", message: "", topic: "" })
-    setTimeout(() => setSubmitSuccess(false), 6000)
+    setSubmitError("")
+    try {
+      const res = await fetch(LEADS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, topic }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || "Не удалось отправить заявку")
+      setSubmitSuccess(true)
+      setFormData({ name: "", phone: "", message: "", topic: "" })
+      setTimeout(() => setSubmitSuccess(false), 8000)
+    } catch (err) {
+      setSubmitError(
+        `${err instanceof Error ? err.message : "Не удалось отправить заявку"}. Позвоните нам: ${phone}`,
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const field =
@@ -246,6 +264,8 @@ export function ContactSection() {
                   <p className="mt-3 text-center font-mono text-sm text-primary">
                     {t("form_success")}
                   </p>
+                ) : submitError ? (
+                  <p className="mt-3 text-center font-mono text-xs text-red-300">{submitError}</p>
                 ) : (
                   <p className="mt-3 text-center font-mono text-[11px] text-foreground/40">
                     {t("form_consent")}

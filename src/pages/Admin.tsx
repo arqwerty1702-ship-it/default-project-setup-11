@@ -27,7 +27,8 @@ import {
   type FormItem,
 } from "@/components/admin/ItemForm";
 import { SettingsForm } from "@/components/admin/SettingsForm";
-import { TextsForm } from "@/components/admin/TextsForm";
+import { TextsForm } from "@/components/admin/TextsForm"
+import { LeadsTab } from "@/components/admin/LeadsTab";
 import { ChangePassword } from "@/components/admin/ChangePassword";
 import {
   adminRequest,
@@ -37,9 +38,9 @@ import {
 } from "@/components/admin/api";
 import { useContent } from "@/data/articles";
 
-const TABS = ["Тексты", "Услуги", "Статьи", "Практика", "Контакты"] as const;
+const TABS = ["Заявки", "Тексты", "Услуги", "Статьи", "Практика", "Контакты"] as const;
 type Tab = (typeof TABS)[number];
-const TYPE: Record<Exclude<Tab, "Контакты" | "Тексты">, ContentType> = {
+const TYPE: Record<Exclude<Tab, "Контакты" | "Тексты" | "Заявки">, ContentType> = {
   Статьи: "articles",
   Практика: "cases",
   Услуги: "services",
@@ -52,7 +53,7 @@ const NEW_LABEL: Record<ContentType, string> = {
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getPassword());
-  const [tab, setTab] = useState<Tab>("Тексты");
+  const [tab, setTab] = useState<Tab>("Заявки");
   const [editing, setEditing] = useState<FormItem | null>(null);
   const [removing, setRemoving] = useState<{
     id: number;
@@ -63,9 +64,10 @@ export default function Admin() {
   const { data, isLoading } = useContent();
   const qc = useQueryClient();
   const isTexts = tab === "Тексты";
-  const isSettings = tab === "Контакты" || isTexts;
+  const isLeads = tab === "Заявки";
+  const isSettings = tab === "Контакты" || isTexts || isLeads;
   const type: ContentType =
-    tab === "Контакты" || tab === "Тексты" ? "articles" : TYPE[tab];
+    tab === "Контакты" || tab === "Тексты" || tab === "Заявки" ? "articles" : TYPE[tab];
 
   if (!authed)
     return (
@@ -185,6 +187,18 @@ export default function Admin() {
         {isSettings ? (
           isLoading ? (
             <p className="text-muted-foreground">Загрузка...</p>
+          ) : isLeads ? (
+            <LeadsTab
+              leadsEmail={(data?.settings as Record<string, string> | undefined)?.leads_email ?? ""}
+              savingEmail={saving}
+              onSaveEmail={(leads_email) =>
+                run("PUT", { type: "settings", settings: { leads_email } }, "Почта сохранена")
+              }
+              onUnauthorized={() => {
+                clearPassword();
+                setAuthed(false);
+              }}
+            />
           ) : isTexts ? (
             <TextsForm
               initial={
