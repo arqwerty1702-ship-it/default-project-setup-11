@@ -1,0 +1,5 @@
+CREATE TABLE private_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

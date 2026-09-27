@@ -62,6 +62,33 @@ export function LeadsTab({
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [open, setOpen] = useState<number | null>(null)
   const [email, setEmail] = useState(leadsEmail)
+  const [smtp, setSmtp] = useState("")
+  const [smtpBusy, setSmtpBusy] = useState(false)
+
+  const saveSmtp = async () => {
+    setSmtpBusy(true)
+    try {
+      await call("POST", { action: "set_smtp", smtp_password: smtp })
+      setSmtp("")
+      toast.success("Пароль принят, письма будут приходить")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Ошибка")
+    } finally {
+      setSmtpBusy(false)
+    }
+  }
+
+  const testEmail = async () => {
+    setSmtpBusy(true)
+    try {
+      await call("POST", { action: "test_email" })
+      toast.success("Тестовое письмо отправлено — проверьте почту")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Ошибка")
+    } finally {
+      setSmtpBusy(false)
+    }
+  }
 
   const call = useCallback(
     async (method: "POST" | "PUT" | "DELETE", body: Record<string, unknown> = {}) => {
@@ -119,6 +146,37 @@ export function LeadsTab({
           <Button type="submit" variant="outline" disabled={savingEmail}>
             Сохранить
           </Button>
+        </form>
+        <form
+          className="mt-5 flex flex-col gap-3 border-t border-foreground/10 pt-5 md:flex-row md:items-end"
+          onSubmit={(e) => {
+            e.preventDefault()
+            saveSmtp()
+          }}
+        >
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor="smtp">Пароль приложения от legal-dome@mail.ru</Label>
+            <Input
+              id="smtp"
+              type="password"
+              autoComplete="off"
+              value={smtp}
+              onChange={(e) => setSmtp(e.target.value)}
+              placeholder={emailReady ? "Сохранён — введите новый, чтобы заменить" : "16 символов из настроек Mail.ru"}
+            />
+            <p className="text-xs text-muted-foreground">
+              Создаётся на id.mail.ru/security → «Пароли для внешних приложений». Обычный пароль от почты не подойдёт
+            </p>
+          </div>
+          <Button type="submit" disabled={smtpBusy || !smtp.trim()}>
+            {smtpBusy ? "Проверяем..." : "Сохранить пароль"}
+          </Button>
+          {emailReady && (
+            <Button type="button" variant="outline" disabled={smtpBusy} onClick={testEmail}>
+              <Icon name="Send" size={16} className="mr-1.5" />
+              Тест письма
+            </Button>
+          )}
         </form>
         {!emailReady && (
           <p className="mt-3 flex items-start gap-2 text-sm text-amber-300">
