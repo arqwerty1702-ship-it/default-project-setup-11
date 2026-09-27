@@ -13,8 +13,8 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
     setLoading(true)
     setError("")
     try {
-      await adminRequest("POST", { type: "cases", action: "check" }, value)
-      setPassword(value)
+      await adminRequest("POST", { type: "cases", action: "check" }, value.trim())
+      setPassword(value.trim())
       onSuccess()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка входа")

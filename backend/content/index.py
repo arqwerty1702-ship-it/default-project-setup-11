@@ -62,13 +62,13 @@ def handler(event: dict, context) -> dict:
         return resp(200, data)
 
     headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
-    expected = os.environ.get('ADMIN_PASSWORD', '')
-    given = headers.get('x-admin-password', '')
-    if not expected or not hmac.compare_digest(given, expected):
+    expected = os.environ.get('ADMIN_PASSWORD', '').strip()
+    body = json.loads(event.get('body') or '{}')
+    given = str(body.get('password') or headers.get('x-admin-password', '')).strip()
+    if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
         conn.close()
         return resp(401, {'error': 'Неверный пароль'})
 
-    body = json.loads(event.get('body') or '{}')
     table = body.get('type') or params.get('type')
     if table == 'settings' and method == 'PUT':
         values = body.get('settings') or {}

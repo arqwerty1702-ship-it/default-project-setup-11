@@ -15,8 +15,8 @@ export async function adminRequest(
 ): Promise<RawContent & { ok?: boolean }> {
   const res = await fetch(CONTENT_URL, {
     method,
-    headers: { "Content-Type": "application/json", "X-Admin-Password": password },
-    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, password }),
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.error || "Ошибка сохранения")
