@@ -219,9 +219,7 @@ export default function Index() {
           onClick={() => scrollToSection(0)}
           className="flex items-center gap-2 transition-transform hover:scale-105"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
-            <span className="font-serif text-xl font-semibold text-foreground">LD</span>
-          </div>
+          <img src="/logo-mark.png" alt="Legal Dome" className="h-12 w-12 object-contain" />
           <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">Legal Dome</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">юридическое бюро</span></span>
         </button>
 
