@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { useReveal } from "@/hooks/use-reveal"
 import Icon from "@/components/ui/icon"
-import { articles, type Article } from "@/data/articles"
+import { useContent, toArticle, type Article } from "@/data/articles"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SectionTabs } from "@/components/section-tabs"
+import { Pager } from "@/components/pager"
 import { CasesList } from "@/components/sections/work-section"
 
 const TABS = ["Статьи", "Практика"] as const
@@ -14,9 +15,16 @@ export function ArticlesSection() {
   const [active, setActive] = useState<Article | null>(null)
   const [filter, setFilter] = useState<string>("Все")
   const [tab, setTab] = useState<(typeof TABS)[number]>("Статьи")
+  const { data, isLoading } = useContent()
+  const articles = (data?.articles ?? []).map(toArticle)
+  const cases = data?.cases ?? []
 
   const categories = ["Все", ...Array.from(new Set(articles.map((a) => a.category)))]
-  const list = (filter === "Все" ? articles : articles.filter((a) => a.category === filter)).slice(0, 3)
+  const filtered = filter === "Все" ? articles : articles.filter((a) => a.category === filter)
+  const [page, setPage] = useState(0)
+  const pages = Math.max(1, Math.ceil(filtered.length / 3))
+  const current = Math.min(page, pages - 1)
+  const list = filtered.slice(current * 3, current * 3 + 3)
 
   return (
     <section
@@ -42,7 +50,10 @@ export function ArticlesSection() {
             {categories.map((c) => (
               <button
                 key={c}
-                onClick={() => setFilter(c)}
+                onClick={() => {
+                  setFilter(c)
+                  setPage(0)
+                }}
                 className={`rounded-full border px-4 py-1.5 font-mono text-xs transition-all ${
                   filter === c
                     ? "border-primary bg-primary text-primary-foreground"
@@ -55,7 +66,14 @@ export function ArticlesSection() {
           </div>
         </div>
 
-        {tab === "Практика" && <CasesList isVisible={isVisible} />}
+        {tab === "Практика" && <CasesList cases={cases} isVisible={isVisible} />}
+
+        {tab === "Статьи" && isLoading && (
+          <p className="font-mono text-sm text-foreground/50">Загружаем статьи...</p>
+        )}
+        {tab === "Статьи" && !isLoading && filtered.length === 0 && (
+          <p className="font-mono text-sm text-foreground/50">Статей пока нет</p>
+        )}
 
         <div className={`grid gap-4 md:grid-cols-3 md:gap-6 ${tab === "Статьи" ? "" : "hidden"}`}>
           {list.map((article, i) => (
@@ -85,6 +103,10 @@ export function ArticlesSection() {
             </button>
           ))}
         </div>
+
+        {tab === "Статьи" && pages > 1 && (
+          <Pager page={current} pages={pages} onChange={setPage} />
+        )}
       </div>
 
       <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>

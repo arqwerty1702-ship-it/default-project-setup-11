@@ -1,0 +1,4 @@
+{"tests": [
+  {"name": "Список статей и дел", "method": "GET", "path": "/", "expectedStatus": 200},
+  {"name": "Без пароля нельзя менять", "method": "POST", "path": "/", "body": {"type": "cases", "item": {"title": "x"}}, "expectedStatus": 401}
+]}

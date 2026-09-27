@@ -1,36 +1,37 @@
-const cases = [
-  {
-    number: "01",
-    title: "Вернули 4,2 млн ₽ покупателю",
-    category: "Сделка с банкротом-продавцом · Арбитражный суд",
-    year: "2026",
-    direction: "left",
-  },
-  {
-    number: "02",
-    title: "Неустойка 1,8 млн ₽ с застройщика",
-    category: "Защита 12 дольщиков ЖК · Районный суд",
-    year: "2025",
-    direction: "right",
-  },
-  {
-    number: "03",
-    title: "Узаконили дом на 240 м²",
-    category: "Самовольная постройка · Признание права",
-    year: "2025",
-    direction: "left",
-  },
-]
+import { useState } from "react"
+import { Pager } from "@/components/pager"
+import type { CaseItem } from "@/data/articles"
 
-export function CasesList({ isVisible }: { isVisible: boolean }) {
+export function CasesList({ cases, isVisible }: { cases: CaseItem[]; isVisible: boolean }) {
+  const [page, setPage] = useState(0)
+  const pages = Math.max(1, Math.ceil(cases.length / 3))
+  const current = Math.min(page, pages - 1)
+  const list = cases.slice(current * 3, current * 3 + 3)
+
+  if (cases.length === 0) {
+    return <p className="font-mono text-sm text-foreground/50">Дела пока не добавлены</p>
+  }
+
   return (
     <div>
       <div className="space-y-4 md:space-y-6">
-        {cases.map((project, i) => (
-          <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
+        {list.map((c, i) => (
+          <ProjectCard
+            key={c.id}
+            project={{
+              number: String(current * 3 + i + 1).padStart(2, "0"),
+              title: c.title,
+              category: c.category,
+              year: c.year,
+              direction: i % 2 === 0 ? "left" : "right",
+            }}
+            index={i}
+            isVisible={isVisible}
+          />
         ))}
       </div>
-      <p className="mt-8 max-w-xl font-mono text-xs text-foreground/50 md:text-sm">
+      {pages > 1 && <Pager page={current} pages={pages} onChange={setPage} />}
+      <p className="mt-6 max-w-xl font-mono text-xs text-foreground/50 md:text-sm">
         Имена клиентов не раскрываем — адвокатская тайна. Подробности дел готовы обсудить на консультации.
       </p>
     </div>
