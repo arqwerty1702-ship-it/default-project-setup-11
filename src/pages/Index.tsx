@@ -1,5 +1,4 @@
 import { Shader, ChromaFlow, Swirl } from "shaders/react"
-import { CustomCursor } from "@/components/custom-cursor"
 import { GrainOverlay } from "@/components/grain-overlay"
 import { WorkSection } from "@/components/sections/work-section"
 import { ServicesSection } from "@/components/sections/services-section"
@@ -176,7 +175,6 @@ export default function Index() {
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-background">
-      <CustomCursor />
       <GrainOverlay />
 
       <div
@@ -186,8 +184,8 @@ export default function Index() {
       >
         <Shader className="h-full w-full">
           <Swirl
-            colorA="#0f2a44"
-            colorB="#b8894a"
+            colorA="#15314a"
+            colorB="#3f7a6a"
             speed={0.8}
             detail={0.8}
             blend={50}
@@ -199,11 +197,11 @@ export default function Index() {
             fineY={40}
           />
           <ChromaFlow
-            baseColor="#10263d"
-            upColor="#1b3d5e"
-            downColor="#d9cbb0"
-            leftColor="#b8894a"
-            rightColor="#8a6a3a"
+            baseColor="#12283a"
+            upColor="#24506e"
+            downColor="#9fc2b8"
+            leftColor="#4f8c7a"
+            rightColor="#2f5f6e"
             intensity={0.9}
             radius={1.8}
             momentum={25}
@@ -224,9 +222,9 @@ export default function Index() {
           className="flex items-center gap-2 transition-transform hover:scale-105"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
-            <span className="font-serif text-2xl font-semibold text-foreground">Ф</span>
+            <span className="font-serif text-xl font-semibold text-foreground">LD</span>
           </div>
-          <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">Фундамент</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">юридическое бюро</span></span>
+          <span className="flex flex-col items-start leading-none"><span className="font-serif text-2xl font-semibold tracking-tight text-foreground">Legal Dome</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">юридическое бюро</span></span>
         </button>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -269,7 +267,7 @@ export default function Index() {
             </div>
             <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-serif text-6xl font-medium leading-[1.0] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
-                Надёжный фундамент <em className="font-normal italic text-primary">вашей</em> сделки
+                Юридический фундамент <em className="font-normal italic text-primary">вашей</em> недвижимости
               </span>
             </h1>
             <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">

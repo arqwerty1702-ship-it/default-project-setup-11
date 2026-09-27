@@ -35,7 +35,7 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
               style={{ transitionDelay: "200ms" }}
             >
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                «Фундамент» — команда юристов и адвокатов, которые более 11 лет работают только с недвижимостью: от покупки первой квартиры до многолетних земельных споров.
+                «Legal Dome» — команда юристов и адвокатов, которые более 11 лет работают только с недвижимостью: от покупки первой квартиры до многолетних земельных споров.
               </p>
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
                 Мы честно оцениваем шансы до начала работы, фиксируем стоимость в договоре и держим клиента в курсе каждого шага.

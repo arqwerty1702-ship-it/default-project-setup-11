@@ -80,7 +80,7 @@ export function ContactSection() {
               </a>
 
               <a
-                href="mailto:help@fundament-law.ru"
+                href="mailto:help@legaldome.ru"
                 className={`group block transition-all duration-700 ${
                   isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
                 }`}
@@ -91,7 +91,7 @@ export function ContactSection() {
                   <span className="font-mono text-xs text-foreground/60">Email</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-primary md:text-2xl">
-                  help@fundament-law.ru
+                  help@legaldome.ru
                 </p>
               </a>
 
