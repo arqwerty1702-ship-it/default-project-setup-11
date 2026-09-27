@@ -2,6 +2,7 @@ import { MagneticButton } from "@/components/magnetic-button"
 import { useReveal } from "@/hooks/use-reveal"
 
 export function AboutSection({ scrollToSection }: { scrollToSection?: (index: number) => void }) {
+  const last = 5
   const { ref, isVisible } = useReveal(0.3)
 
   return (
@@ -18,12 +19,12 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
                 isVisible ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0"
               }`}
             >
-              <h2 className="mb-3 font-sans text-3xl font-light leading-[1.1] tracking-tight text-foreground md:mb-4 md:text-6xl lg:text-7xl">
-                Создаем
+              <h2 className="mb-3 font-serif text-4xl font-medium leading-[1.0] tracking-tight text-foreground md:mb-4 md:text-6xl lg:text-7xl">
+                Право
                 <br />
-                будущее
+                на вашей
                 <br />
-                <span className="text-foreground/40">цифровых</span>
+                <span className="italic text-primary">стороне</span>
               </h2>
             </div>
 
@@ -34,10 +35,10 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
               style={{ transitionDelay: "200ms" }}
             >
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Мы команда дизайнеров, разработчиков и технологов, которые создают исключительные цифровые продукты.
+                «Фундамент» — команда юристов и адвокатов, которые более 11 лет работают только с недвижимостью: от покупки первой квартиры до многолетних земельных споров.
               </p>
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Каждый проект — это возможность исследовать новые решения и раздвигать границы возможного.
+                Мы честно оцениваем шансы до начала работы, фиксируем стоимость в договоре и держим клиента в курсе каждого шага.
               </p>
             </div>
           </div>
@@ -45,9 +46,9 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
           {/* Right side - Stats with creative layout */}
           <div className="flex flex-col justify-center space-y-6 md:space-y-12">
             {[
-              { value: "150+", label: "Проектов", sublabel: "Реализовано по всему миру", direction: "right" },
-              { value: "8", label: "Лет", sublabel: "Опыта и инноваций", direction: "left" },
-              { value: "12", label: "Наград", sublabel: "Отраслевое признание", direction: "right" },
+              { value: "1 200+", label: "Сделок", sublabel: "Проверено и сопровождено", direction: "right" },
+              { value: "11", label: "Лет", sublabel: "Практики в сфере недвижимости", direction: "left" },
+              { value: "87%", label: "Выигранных дел", sublabel: "В судах общей юрисдикции и арбитраже", direction: "right" },
             ].map((stat, i) => {
               const getRevealClass = () => {
                 if (!isVisible) {
@@ -66,7 +67,7 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
                     maxWidth: i % 2 === 0 ? "100%" : "85%",
                   }}
                 >
-                  <div className="text-3xl font-light text-foreground md:text-6xl lg:text-7xl">{stat.value}</div>
+                  <div className="font-serif text-4xl font-medium text-foreground md:text-6xl lg:text-7xl">{stat.value}</div>
                   <div>
                     <div className="font-sans text-base font-light text-foreground md:text-xl">{stat.label}</div>
                     <div className="font-mono text-xs text-foreground/60">{stat.sublabel}</div>
@@ -83,11 +84,11 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
           }`}
           style={{ transitionDelay: "750ms" }}
         >
-          <MagneticButton size="lg" variant="primary" onClick={() => scrollToSection?.(4)}>
-            Начать проект
+          <MagneticButton size="lg" variant="primary" onClick={() => scrollToSection?.(last)}>
+            Записаться на консультацию
           </MagneticButton>
           <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection?.(1)}>
-            Смотреть работы
+            Наша практика
           </MagneticButton>
         </div>
       </div>

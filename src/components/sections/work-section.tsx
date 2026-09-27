@@ -1,5 +1,29 @@
 import { useReveal } from "@/hooks/use-reveal"
 
+const cases = [
+  {
+    number: "01",
+    title: "Вернули 4,2 млн ₽ покупателю",
+    category: "Сделка с банкротом-продавцом · Арбитражный суд",
+    year: "2026",
+    direction: "left",
+  },
+  {
+    number: "02",
+    title: "Неустойка 1,8 млн ₽ с застройщика",
+    category: "Защита 12 дольщиков ЖК · Районный суд",
+    year: "2025",
+    direction: "right",
+  },
+  {
+    number: "03",
+    title: "Узаконили дом на 240 м²",
+    category: "Самовольная постройка · Признание права",
+    year: "2025",
+    direction: "left",
+  },
+]
+
 export function WorkSection() {
   const { ref, isVisible } = useReveal(0.3)
 
@@ -14,39 +38,26 @@ export function WorkSection() {
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
           }`}
         >
-          <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Проекты
+          <h2 className="mb-2 font-serif text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl">
+            Практика
           </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Избранные работы</p>
+          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Дела, которые мы выиграли</p>
         </div>
 
         <div className="space-y-6 md:space-y-8">
-          {[
-            {
-              number: "01",
-              title: "ТехноСтарт",
-              category: "Корпоративный портал",
-              year: "2024",
-              direction: "left",
-            },
-            {
-              number: "02",
-              title: "АльфаТрейд",
-              category: "Финтех платформа",
-              year: "2024",
-              direction: "right",
-            },
-            {
-              number: "03",
-              title: "МедиаПульс",
-              category: "Медиа сервис",
-              year: "2023",
-              direction: "left",
-            },
-          ].map((project, i) => (
+          {cases.map((project, i) => (
             <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
           ))}
         </div>
+
+        <p
+          className={`mt-10 max-w-xl font-mono text-xs text-foreground/50 transition-all duration-700 md:text-sm ${
+            isVisible ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDelay: "600ms" }}
+        >
+          Имена клиентов не раскрываем — адвокатская тайна. Подробности дел готовы обсудить на консультации.
+        </p>
       </div>
     </section>
   )
@@ -70,7 +81,7 @@ function ProjectCard({
 
   return (
     <div
-      className={`group flex items-center justify-between border-b border-foreground/10 py-6 transition-all duration-700 hover:border-foreground/20 md:py-8 ${getRevealClass()}`}
+      className={`group flex items-center justify-between gap-4 border-b border-foreground/10 py-5 transition-all duration-700 hover:border-primary/50 md:py-7 ${getRevealClass()}`}
       style={{
         transitionDelay: `${index * 150}ms`,
         marginLeft: index % 2 === 0 ? "0" : "auto",
@@ -78,11 +89,11 @@ function ProjectCard({
       }}
     >
       <div className="flex items-baseline gap-4 md:gap-8">
-        <span className="font-mono text-sm text-foreground/30 transition-colors group-hover:text-foreground/50 md:text-base">
+        <span className="font-mono text-sm text-primary/60 transition-colors group-hover:text-primary md:text-base">
           {project.number}
         </span>
         <div>
-          <h3 className="mb-1 font-sans text-2xl font-light text-foreground transition-transform duration-300 group-hover:translate-x-2 md:text-3xl lg:text-4xl">
+          <h3 className="mb-1 font-serif text-2xl font-medium text-foreground transition-transform duration-300 group-hover:translate-x-2 md:text-3xl lg:text-4xl">
             {project.title}
           </h3>
           <p className="font-mono text-xs text-foreground/50 md:text-sm">{project.category}</p>
