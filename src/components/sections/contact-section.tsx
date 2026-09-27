@@ -42,7 +42,6 @@ export function ContactSection() {
     if (formData.name.trim().length < 2) e.name = "Укажите имя"
     const digits = formData.phone.replace(/\D/g, "")
     if (digits.length < 10 || digits.length > 12) e.phone = "Проверьте номер телефона"
-    if (formData.message.trim().length < 10) e.message = "Опишите ситуацию хотя бы в паре слов"
     setErrors(e)
     return Object.keys(e).length === 0
   }

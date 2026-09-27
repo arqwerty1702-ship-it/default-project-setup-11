@@ -87,6 +87,7 @@ def handler(event: dict, context) -> dict:
         message = str(body.get('message') or '').strip()[:5000]
         digits = re.sub(r'\D', '', phone)
         if len(name) < 2 or not (10 <= len(digits) <= 12):
+            print(f"lead rejected: name_len={len(name)} phone_digits={len(digits)}")
             conn.close()
             return resp(400, {'error': 'Проверьте имя и телефон'})
         if body.get('website'):
@@ -114,6 +115,7 @@ def handler(event: dict, context) -> dict:
             )
         except Exception as e:
             print(f"email error: {e}")
+        print(f"lead saved id={lead_id} email_sent={sent}")
         if sent:
             cur.execute(f"UPDATE {schema}.leads SET email_sent = TRUE WHERE id = {int(lead_id)}")
         conn.close()
