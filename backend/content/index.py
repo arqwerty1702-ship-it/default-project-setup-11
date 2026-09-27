@@ -1,6 +1,7 @@
 import json
 import os
 import hmac
+import hashlib
 import psycopg2
 
 CORS = {
@@ -44,6 +45,22 @@ def fetch_all(cur, schema: str) -> dict:
     return data
 
 
+def hash_password(password: str) -> str:
+    salt = os.urandom(16)
+    iterations = 200000
+    digest = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iterations).hex()
+    return f"pbkdf2${iterations}${salt.hex()}${digest}"
+
+
+def check_password(password: str, stored: str) -> bool:
+    try:
+        _, iterations, salt, digest = stored.split('$')
+    except ValueError:
+        return False
+    calc = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), int(iterations)).hex()
+    return hmac.compare_digest(calc, digest)
+
+
 def handler(event: dict, context) -> dict:
     """Контент сайта (статьи, дела, услуги, контакты): публичное чтение и управление из админ-панели по паролю."""
     method = event.get('httpMethod', 'GET')
@@ -62,12 +79,24 @@ def handler(event: dict, context) -> dict:
         return resp(200, data)
 
     headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
-    expected = os.environ.get('ADMIN_PASSWORD', '').strip()
     body = json.loads(event.get('body') or '{}')
     given = str(body.get('password') or headers.get('x-admin-password', '')).strip()
-    if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
+    cur.execute(f"SELECT password_hash FROM {schema}.admin_auth WHERE id = 1")
+    row = cur.fetchone()
+    if not given or not row or not check_password(given, row[0]):
         conn.close()
         return resp(401, {'error': 'Неверный пароль'})
+
+    if body.get('action') == 'change_password':
+        new_password = str(body.get('new_password') or '').strip()
+        if len(new_password) < 8:
+            conn.close()
+            return resp(400, {'error': 'Пароль должен быть не короче 8 символов'})
+        cur.execute(
+            f"UPDATE {schema}.admin_auth SET password_hash = {q(hash_password(new_password))}, updated_at = NOW() WHERE id = 1"
+        )
+        conn.close()
+        return resp(200, {'ok': True})
 
     table = body.get('type') or params.get('type')
     if table == 'settings' and method == 'PUT':

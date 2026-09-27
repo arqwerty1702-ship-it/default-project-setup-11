@@ -18,6 +18,7 @@ import { SectionTabs } from "@/components/section-tabs"
 import { AdminLogin } from "@/components/admin/AdminLogin"
 import { ItemForm, emptyItem, type FormItem } from "@/components/admin/ItemForm"
 import { SettingsForm } from "@/components/admin/SettingsForm"
+import { ChangePassword } from "@/components/admin/ChangePassword"
 import { adminRequest, clearPassword, getPassword, type ContentType } from "@/components/admin/api"
 import { useContent } from "@/data/articles"
 
@@ -32,6 +33,7 @@ export default function Admin() {
   const [editing, setEditing] = useState<FormItem | null>(null)
   const [removing, setRemoving] = useState<{ id: number; title: string } | null>(null)
   const [saving, setSaving] = useState(false)
+  const [pwOpen, setPwOpen] = useState(false)
   const { data, isLoading } = useContent()
   const qc = useQueryClient()
   const isSettings = tab === "Контакты"
@@ -95,6 +97,10 @@ export default function Admin() {
                 <Icon name="ExternalLink" size={16} className="mr-1.5" />
                 Сайт
               </a>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setPwOpen(true)}>
+              <Icon name="KeyRound" size={16} className="md:mr-1.5" />
+              <span className="hidden md:inline">Пароль</span>
             </Button>
             <Button
               variant="ghost"
@@ -187,6 +193,8 @@ export default function Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ChangePassword open={pwOpen} onOpenChange={setPwOpen} />
 
       <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
         <AlertDialogContent>
