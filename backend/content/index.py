@@ -4,6 +4,9 @@ import os
 import hmac
 import hashlib
 import psycopg2
+import base64
+import uuid
+import boto3
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -16,7 +19,11 @@ FIELDS = {
     'articles': ['title', 'category', 'date_label', 'read_time', 'excerpt', 'body', 'sort_order'],
     'cases': ['title', 'category', 'year', 'sort_order'],
     'services': ['title', 'description', 'price', 'icon', 'sort_order'],
+    'links': ['title', 'url', 'image_url', 'description', 'sort_order'],
+    'faq': ['title', 'answer', 'category', 'sort_order'],
 }
+
+IMAGE_TYPES = {'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif'}
 
 
 
@@ -62,7 +69,7 @@ def check_password(password: str, stored: str) -> bool:
 
 
 def handler(event: dict, context) -> dict:
-    """Контент сайта (статьи, дела, услуги, контакты): публичное чтение и управление из админ-панели по паролю."""
+    """Контент сайта (статьи, дела, услуги, полезные ссылки, база знаний, контакты): публичное чтение и управление из админ-панели по паролю."""
     method = event.get('httpMethod', 'GET')
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
@@ -97,6 +104,30 @@ def handler(event: dict, context) -> dict:
         )
         conn.close()
         return resp(200, {'ok': True})
+
+    if body.get('action') == 'upload_image':
+        ctype = str(body.get('content_type') or '')
+        ext = IMAGE_TYPES.get(ctype)
+        raw = str(body.get('data') or '')
+        if ',' in raw[:100]:
+            raw = raw.split(',', 1)[1]
+        if not ext or not raw:
+            conn.close()
+            return resp(400, {'error': 'Загрузите картинку в формате JPG, PNG, WEBP или GIF'})
+        data = base64.b64decode(raw)
+        if len(data) > 5 * 1024 * 1024:
+            conn.close()
+            return resp(400, {'error': 'Картинка больше 5 МБ — уменьшите её'})
+        key = f"site/{uuid.uuid4().hex}.{ext}"
+        s3 = boto3.client(
+            's3',
+            endpoint_url='https://bucket.poehali.dev',
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+        )
+        s3.put_object(Bucket='files', Key=key, Body=data, ContentType=ctype)
+        conn.close()
+        return resp(200, {'url': f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"})
 
     table = body.get('type') or params.get('type')
     if table == 'settings' and method == 'PUT':

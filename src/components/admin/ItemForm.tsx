@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Icon from "@/components/ui/icon"
 import type { ContentType } from "./api"
+import { ImageField } from "./ImageField"
 
 export type FormItem = Record<string, string | number>
 
@@ -28,6 +29,21 @@ const FIELDS: Record<ContentType, Field[]> = {
     { key: "title", label: "Название услуги", placeholder: "Проверка объекта и сделки" },
     { key: "description", label: "Описание", multiline: 3, placeholder: "Что входит в услугу" },
     { key: "price", label: "Цена", placeholder: "от 15 000 ₽" },
+  ],
+  links: [
+    { key: "title", label: "Подпись к картинке", placeholder: "Публичная кадастровая карта" },
+    { key: "url", label: "Ссылка (куда ведёт картинка)", placeholder: "https://nspd.gov.ru/map", hint: "Откроется в новой вкладке" },
+    { key: "description", label: "Пояснение (необязательно)", multiline: 2, placeholder: "Для чего пригодится ресурс" },
+  ],
+  faq: [
+    { key: "title", label: "Вопрос", placeholder: "Какие документы проверить перед покупкой квартиры?" },
+    {
+      key: "answer",
+      label: "Ответ",
+      multiline: 10,
+      hint: "Абзацы разделяйте пустой строкой. Ссылку можно вставить как есть (https://...) или так: [текст ссылки](https://...)",
+    },
+    { key: "category", label: "Тема (для фильтра, необязательно)", placeholder: "Покупка жилья" },
   ],
 }
 
@@ -102,6 +118,9 @@ export function ItemForm({
           {f.hint && <p className="text-xs text-muted-foreground">{f.hint}</p>}
         </div>
       ))}
+      {type === "links" && (
+        <ImageField value={String(item.image_url ?? "")} onChange={(url) => setItem({ ...item, image_url: url })} />
+      )}
       {type === "services" && (
         <div className="space-y-1.5">
           <Label>Иконка</Label>

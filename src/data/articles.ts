@@ -48,6 +48,23 @@ export interface RawService {
   sort_order: number
 }
 
+export interface RawLink {
+  id: number
+  title: string
+  url: string
+  image_url: string
+  description: string
+  sort_order: number
+}
+
+export interface RawFaq {
+  id: number
+  title: string
+  answer: string
+  category: string
+  sort_order: number
+}
+
 export interface SiteSettings {
   phone?: string
   email?: string
@@ -62,6 +79,8 @@ export interface RawContent {
   articles: RawArticle[]
   cases: RawCase[]
   services: RawService[]
+  links: RawLink[]
+  faq: RawFaq[]
   settings: SiteSettings
 }
 

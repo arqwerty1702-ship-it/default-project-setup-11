@@ -3,6 +3,8 @@ import { GrainOverlay } from "@/components/grain-overlay"
 import { ServicesSection } from "@/components/sections/services-section"
 import { ContactSection } from "@/components/sections/contact-section"
 import { ArticlesSection } from "@/components/sections/articles-section"
+import { ToolsSection } from "@/components/sections/tools-section"
+import { FaqSection } from "@/components/sections/faq-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState } from "react"
 import { useTexts } from "@/data/texts"
@@ -10,8 +12,9 @@ import { AccentText } from "@/components/rich-text"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MobileMenu } from "@/components/mobile-menu"
 
-const NAV_KEYS = ["nav_home", "nav_services", "nav_articles", "nav_contacts"]
+const NAV_KEYS = ["nav_home", "nav_services", "nav_articles", "nav_contacts", "nav_tools", "nav_faq"]
 const LAST = NAV_KEYS.length - 1
+const CONTACTS = 3
 
 export default function Index() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -239,7 +242,7 @@ export default function Index() {
           <span className="flex flex-col items-start leading-none"><span className="font-serif text-xl font-semibold tracking-tight text-foreground md:text-2xl">{t("brand_name")}</span><span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/60">{t("brand_tagline")}</span></span>
         </button>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-5 lg:flex xl:gap-8">
           {NAV_KEYS.map((key, index) => (
             <button
               key={key}
@@ -258,8 +261,8 @@ export default function Index() {
           ))}
         </div>
 
-        <div className="hidden md:block">
-          <MagneticButton variant="secondary" onClick={() => scrollToSection(LAST)}>
+        <div className="hidden lg:block">
+          <MagneticButton variant="secondary" onClick={() => scrollToSection(CONTACTS)}>
             {t("nav_cta")}
           </MagneticButton>
         </div>
@@ -267,7 +270,7 @@ export default function Index() {
           items={NAV_KEYS.map((key) => t(key))}
           cta={t("nav_cta")}
           onSelect={scrollToSection}
-          onCta={() => scrollToSection(LAST)}
+          onCta={() => scrollToSection(CONTACTS)}
         />
       </nav>
 
@@ -299,7 +302,7 @@ export default function Index() {
               <MagneticButton
                 size="lg"
                 variant="primary"
-                onClick={() => scrollToSection(LAST)}
+                onClick={() => scrollToSection(CONTACTS)}
               >
                 {t("hero_btn_primary")}
               </MagneticButton>
@@ -322,6 +325,8 @@ export default function Index() {
         <ServicesSection />
         <ArticlesSection />
         <ContactSection />
+        <ToolsSection />
+        <FaqSection onAsk={() => scrollToSection(CONTACTS)} />
       </div>
 
       <style>{`

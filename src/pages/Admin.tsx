@@ -38,17 +38,21 @@ import {
 } from "@/components/admin/api";
 import { useContent } from "@/data/articles";
 
-const TABS = ["Заявки", "Тексты", "Услуги", "Статьи", "Практика", "Контакты"] as const;
+const TABS = ["Заявки", "Тексты", "Услуги", "Статьи", "Практика", "Ссылки", "База знаний", "Контакты"] as const;
 type Tab = (typeof TABS)[number];
 const TYPE: Record<Exclude<Tab, "Контакты" | "Тексты" | "Заявки">, ContentType> = {
   Статьи: "articles",
   Практика: "cases",
   Услуги: "services",
+  Ссылки: "links",
+  "База знаний": "faq",
 };
 const NEW_LABEL: Record<ContentType, string> = {
   articles: "Новая статья",
   cases: "Новое дело",
   services: "Новая услуга",
+  links: "Новая ссылка",
+  faq: "Новый вопрос",
 };
 
 export default function Admin() {
@@ -88,6 +92,8 @@ export default function Admin() {
         articles: res.articles,
         cases: res.cases,
         services: res.services,
+        links: res.links,
+        faq: res.faq,
         settings: res.settings,
       });
       toast.success(msg);
@@ -112,7 +118,7 @@ export default function Admin() {
     if (ok) setEditing(null);
   };
 
-  const items: { id: number; title: string; sub: string; raw: FormItem }[] =
+  const items: { id: number; title: string; sub: string; image?: string; raw: FormItem }[] =
     type === "articles"
       ? (data?.articles ?? []).map((a) => ({
           id: a.id,
@@ -127,6 +133,21 @@ export default function Admin() {
             sub: `${c.category} · ${c.year}`,
             raw: c as unknown as FormItem,
           }))
+        : type === "links"
+          ? (data?.links ?? []).map((l) => ({
+              id: l.id,
+              title: l.title,
+              sub: l.url,
+              image: l.image_url,
+              raw: l as unknown as FormItem,
+            }))
+          : type === "faq"
+            ? (data?.faq ?? []).map((f) => ({
+                id: f.id,
+                title: f.title,
+                sub: f.category || f.answer.slice(0, 90),
+                raw: f as unknown as FormItem,
+              }))
         : (data?.services ?? []).map((v) => ({
             id: v.id,
             title: v.title,
@@ -231,7 +252,12 @@ export default function Admin() {
                 key={it.id}
                 className="flex items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card p-4"
               >
-                <div className="min-w-0">
+                {type === "links" && (
+                  <div className="h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-foreground/5">
+                    {it.image && <img src={it.image} alt="" className="h-full w-full object-cover" />}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
                   <div className="truncate font-medium text-foreground">
                     {it.title}
                   </div>
